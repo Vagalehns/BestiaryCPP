@@ -2,6 +2,7 @@
 // Created by armands on 14.11.25.
 //
 
+
 #ifndef BESTIARYCPP_STYLING_FUNCTIONS_H
 #define BESTIARYCPP_STYLING_FUNCTIONS_H
 
@@ -98,6 +99,5 @@
 #endif
 
 // Reset
-
 
 #endif //BESTIARYCPP_STYLING_FUNCTIONS_H

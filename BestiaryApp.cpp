@@ -17,14 +17,12 @@ BestiaryApp::BestiaryApp(AppState state) : StartMenu("Main Menu", "Exit") {
 
     State = state;
 
-    StartMenu.addItem({"Item 1", [](){return echo("Item 1 called");} });
+    StartMenu.addItem({"Add animal species", [](){return echo("Item 1 called");} });
     StartMenu.addItem({"Item 2", [](){ return echo("Item 2 called"); }});
     StartMenu.addItem({"Item 3", [](){ return echo("Item 3 called"); }});
     StartMenu.addItem({"Item 4", [](){ return echo("Item 4 called"); }});
     StartMenu.addItem({"Item 5", [](){ return echo("Item 5 called"); }});
     StartMenu.addItem({"Item 6", [](){ return echo("Item 6 called"); }});
-
-    Splashscreen();
 
 }
 
@@ -32,6 +30,11 @@ bool BestiaryApp::Run() {
 
     if (State.help) {
         std::cout << HELP_MESSEGE;
+        return true;
+    }
+
+    if (!State.nofuzz) {
+        Splashscreen();
     }
 
     StartMenu.open();
@@ -39,9 +42,8 @@ bool BestiaryApp::Run() {
     return true;
 }
 
-bool BestiaryApp::Splashscreen() const {
+void BestiaryApp::Splashscreen() {
 
-    if (!State.nofuzz) {
         std::cout << "\n" << BRIGHTGREENSTY << BOLDSTY << SPLASHSCREEN << ENDSTY << "\n";
         std::cout << "                " << APP_USECASE << "\n\n";
         std::cout << "Version: " << APP_VERSION << "\n";
@@ -59,11 +61,5 @@ bool BestiaryApp::Splashscreen() const {
         if (user_input == 'e') {
             std::exit(0);
         }
-
-        return true;
-
-    }
-
-    return false;
 
 };

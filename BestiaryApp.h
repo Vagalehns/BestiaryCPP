@@ -26,7 +26,7 @@ class BestiaryApp {
 
         bool Run();
 
-        bool Splashscreen() const ;
+        static void Splashscreen();
 };
 
 #endif //BESTIARYCPP_BESTIARYAPP_H

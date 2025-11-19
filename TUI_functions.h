@@ -10,10 +10,21 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <vector>
 
 void clearConsole();
 
-int getIntFromUser(int min, int max, std::string question, bool has_upper_bound, bool has_lower_bound);
+std::string generateTable(std::vector<std::string> data, int columns, bool borders=false);
+
+int getIntFromUser(int min, int max, const std::string &question, bool has_upper_bound, bool has_lower_bound);
+bool getConfirmationFromUser(const std::string &question);
+
+bool checkForChar(const std::string &string, char c);
+bool validateString(const std::string &string, const std::string &unallowed_chars);
+
+std::string getStringFromUser(const std::string &question, bool with_confirmation, std::string unallowed_chars);
+std::string getStringFromUser(const std::string &question, bool with_confirmation);
+
 
 typedef struct  {
     std::string title;
@@ -38,7 +49,7 @@ class Menu {
         bool close();
 
     private:
-        int translateFromUserToIndex(int user_sel) {
+        int translateFromUserToIndex(int user_sel) const {
             return item_count-user_sel;
         }
 };

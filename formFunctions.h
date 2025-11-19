@@ -1,0 +1,10 @@
+//
+// Created by armands on 17.11.25.
+//
+
+#ifndef BESTIARYCPP_FORMFUNCTIONS_H
+#define BESTIARYCPP_FORMFUNCTIONS_H
+
+
+
+#endif //BESTIARYCPP_FORMFUNCTIONS_H

@@ -9,4 +9,12 @@ add_executable(BestiaryCPP main.cpp
         TUI_functions.h
         styling_functions.h
         BestiaryApp.cpp
-        BestiaryApp.h)
+        BestiaryApp.h
+        formFunctions.cpp
+        formFunctions.h
+        animalFunctions.cpp
+        animalFunctions.h
+        database.cpp
+        database.h
+        DynamicList.cpp
+        DynamicList.h)
