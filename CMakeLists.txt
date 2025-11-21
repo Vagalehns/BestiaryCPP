@@ -12,9 +12,6 @@ add_executable(BestiaryCPP main.cpp
         BestiaryApp.h
         formFunctions.cpp
         formFunctions.h
-        animalFunctions.cpp
-        animalFunctions.h
-        database.cpp
-        database.h
-        DynamicList.cpp
-        DynamicList.h)
+        genericDataBase.h
+        Animal.h
+)

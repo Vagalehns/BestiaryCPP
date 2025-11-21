@@ -2,33 +2,40 @@
 #include <cstring>
 #include <fstream>
 
-#include "TUI_functions.h"
 #include "BestiaryApp.h"
-#include "animalFunctions.h"
+#include "Animal.h"
 
 int main(int argc, char **argv) {
 
+    SpeciesDB speciesDB;
+    auto speciesResolver = [&speciesDB](KeyID ID) -> Species* {
+        return speciesDB.getByID(ID);
+    };
+    AnimalDB animalDB(speciesResolver);
+    AnimalDB animal_db2(speciesResolver);
 
-    // Create a vector (list) of Animal objects
-    std::vector<Animal> animals = {
-        Animal("Buddy", "Canine", 1001, 5),
-        Animal("Whiskers", "Feline", 1002, 3),
-        Animal("Tweety", "Avian", 1003, 2),
-        Animal("Nemo", "Fish", 1004, 1),
-        Animal("Thunder", "Equine", 1005, 7)
+    speciesDB.appendAutoID({"Tiger", "Panthera tigris", 'M'});
+    speciesDB.appendAutoID({"Dog", "Canis lupus familiaris", 'M'});
+    speciesDB.appendAutoID({"Cat", "Felis catus", 'M'});
+    speciesDB.appendAutoID({"Eagle", "Aquila chrysaetos", 'B'});
+    speciesDB.appendAutoID({"Dolphin", "Tursiops truncatus", 'M'});
+    speciesDB.appendAutoID({"Python", "Python regius", 'R'});
+    speciesDB.appendAutoID({"Parrot", "Psittacus erithacus", 'B'});
+    speciesDB.appendAutoID({"Elephant", "Loxodonta africana", 'M'});
+    speciesDB.appendAutoID({"Penguin", "Aptenodytes forsteri", 'B'});
+    speciesDB.appendAutoID({"Crocodile", "Crocodylus niloticus", 'R'});
+
+    auto stringAssertion = [](std::string A, std::string B) -> int {
+        return B.compare(A);
+
     };
 
-    std::ofstream outFile("example.csv");
+    speciesDB.order(&Species::species, stringAssertion);
 
-    // Loop through the list and display each animal's details
-    for (const auto& animal : animals) {
-        outFile<<animal.savableString()<<std::endl;
-    }
+    speciesDB.display();
 
-    outFile.close();
 
     return 0;
-
 
     AppState appState;
 

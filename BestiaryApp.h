@@ -7,7 +7,11 @@
 
 #include "TUI_functions.h"
 
+
+
 inline bool echo(const std::string &str );
+
+
 
 typedef struct{
     bool nofuzz=false;
@@ -21,6 +25,8 @@ class BestiaryApp {
 
         Menu StartMenu;
         AppState State;
+
+
 
         explicit BestiaryApp(AppState state);
 

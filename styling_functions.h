@@ -9,6 +9,7 @@
 
 #ifdef NOSTYLING
 // If NOSTYLING is enabled, define everything as empty
+#define CLEARSTYLE    ""
 #define BLACKSTY      ""
 #define REDSTY        ""
 #define GREENSTY      ""
@@ -52,6 +53,7 @@
 #else
 // ANSI codes (same as your original definitions)
 // Foreground colors (regular)
+#define CLEARSTYLE    ""
 #define BLACKSTY      "\033[30m"
 #define REDSTY        "\033[31m"
 #define GREENSTY      "\033[32m"

@@ -38,69 +38,7 @@ std::string padString(std::string string_to_pad, unsigned short new_size, char p
     return left_padding+string_to_pad+right_padding;
 };
 
-std::string generateTable(std::vector<std::string> data, int columns, bool borders, bool number_items) {
 
-    unsigned short longest_item_len=0;
-
-    std::string table;
-
-    for (const auto& elem : data) {
-
-        if (elem.length()>longest_item_len) {
-            longest_item_len = elem.length();
-        }
-    }
-
-    //extra padding
-    longest_item_len+=2;
-
-    int item_amount=data.size();
-
-    if (number_items) {
-        longest_item_len += item_amount/10+2;
-    }
-
-
-    int table_hor_size= (longest_item_len+1) * columns + 1;
-
-    std::string hor_div=std::string(table_hor_size, '-');
-
-
-
-
-    int row_amount = ( item_amount + columns - 1) / columns;
-
-    if (borders) table.append(hor_div+"\n");
-
-    for (int i = 0; i < row_amount; ++i) {
-
-        for (int j = 0; j < columns; ++j) {
-
-            if (borders)table.append("|");
-
-            int table_index = i*columns+j ;
-
-            if (table_index<item_amount) {
-                if (number_items) {
-                    table.append(padString( std::to_string(table_index+1) + "." + data[table_index], longest_item_len, ' ', true));
-                }else {
-                    table.append(padString(data[table_index], longest_item_len, ' ', true));
-                }
-
-            }else {
-                table.append(std::string(longest_item_len, ' '));
-            }
-
-        }
-
-        if (borders) table.append("|");
-        table.append("\n");
-        if (borders)table.append(hor_div);
-        table.append("\n");
-    }
-
-    return table;
-};
 
 
 int getIntFromUser(int min, int max, const std::string &question, bool has_upper_bound, bool has_lower_bound) {
