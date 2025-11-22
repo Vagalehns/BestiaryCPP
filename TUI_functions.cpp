@@ -19,6 +19,25 @@ void clearConsole() {
 #endif
 }
 
+void printListItem(std::string item, bool reset) {
+    static int index = 1;
+
+    if (reset) {
+        index = 1;
+        return;
+    }
+
+    std::cout << "\n" << index << ")\t" << item ;
+    index++;
+};
+
+void printListItem(std::string item) {
+    printListItem(item, false);
+};
+
+void resetListItem() {
+    printListItem("", true);
+};
 
 
 std::string padString(std::string string_to_pad, unsigned short new_size, char pad_char, bool center) {
@@ -130,7 +149,7 @@ std::string getStringFromUser(const std::string &question, bool with_confirmatio
     }
 
     do {
-        std::cout << question << "\n>";
+        std::cout << question << std::endl << ">";
 
         std::getline(std::cin, input);
 

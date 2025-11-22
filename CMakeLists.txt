@@ -12,6 +12,9 @@ add_executable(BestiaryCPP main.cpp
         BestiaryApp.h
         formFunctions.cpp
         formFunctions.h
-        genericDataBase.h
-        Animal.h
+        tables/genericDataBase.h
+        tables/Region.cpp
+        tables/Region.h
+        tables/dbParameters.h
+        tables/tableV2.h
 )

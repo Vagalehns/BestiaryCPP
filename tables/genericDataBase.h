@@ -9,16 +9,9 @@
 #include <sstream>
 #include <string>
 
-#include "TUI_functions.h"
+#include "../TUI_functions.h"
 
-#define CSV_SEPERATOR ','
-#define TOO_MANY_ITERS 1000
-
-#ifdef _WIN32
-    #define SLASH '\\'
-#else
-    #define SLASH '/'
-#endif
+#include "dbParameters.h"
 
 
 
@@ -34,6 +27,7 @@ struct DefaultStruct {
     };
 
     DefaultStruct(KeyID id) : ID(id) {};
+
 };
 
 
@@ -152,7 +146,6 @@ class DB {
             return true;
         };
 
-
         bool checkIUniqueID(KeyID new_ID) {
 
             for (int i = 0; i < counter; i++) {
@@ -243,8 +236,11 @@ class DB {
 
             }
 
-            virtual void display(bool hide_filtered=true) = 0;
-            virtual std::string convertToCSV() = 0;
+        virtual void display(bool hide_filtered=true)=0;
+
+
+        virtual std::string convertToCSV()=0;
+        virtual bool inputForm()=0;
 
 };
 

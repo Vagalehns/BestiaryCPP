@@ -6,7 +6,7 @@
 #define BESTIARYCPP_ANIMAL_H
 
 
-#include "genericDataBase.h"
+#include "tables/genericDataBase.h"
 
 #define MAX_ANIMALS 20
 #define MAX_SPECIES 15
