@@ -10,6 +10,8 @@
 #include <vector>
 #include <cmath>
 
+#include "genericDataBase.h"
+#include "genericDataBase.h"
 #include "../styling_functions.h"
 
 #define MAX_PAGE_SIZE 14
@@ -35,6 +37,7 @@ struct TableV2Style {
     bool type_colored=true;
     bool centered=true;
     bool has_hor_div=false;
+    bool is_numbered=true;
 
     unsigned char extra_padding=4;
 
@@ -57,12 +60,17 @@ class TableV2 {
 
 private:
 
-    unsigned int table_width=0;
+    unsigned int table_width=0, left_space_width=40;
+    unsigned int row_amount;
+
     std::string header_render;
     std::string ver_div;
     std::string outer_ver_div;
     std::string hor_div;
     std::string outer_hor_div;
+
+    std::string empty_left_space;
+
     std::vector<std::string> page_renders;
 
     void recalcTableWidth() {
@@ -84,27 +92,21 @@ private:
 
     };
 
-    void recalcColumnWidths() {
-
-        size_t column_amount=columns.size();
-
-        for (size_t i = 0; i < items.size(); ++i) {
-
-            char cur_col=i%column_amount;
-
-            if (items[i].length() > columns[cur_col].width) {
-
-                columns[cur_col].width = items[i].length();
-
-            }
+    void recalcLeftSpace() {
+        if (!ts.is_numbered) {
+            left_space_width = 0;
+            return;
         }
-    };
+        //terrible
+
+        left_space_width = std::to_string(items.size()+1).length() + 1;
+    }
 
 public:
     std::vector<TableV2Column> columns;
     std::vector<std::string> items;
     std::string last_render;
-    TableV2Style ts;
+    TableV2Style ts, base_ts;
 
     TableV2() {
         last_render = "";
@@ -113,7 +115,7 @@ public:
         outer_ver_div = "";
         hor_div = "";
         outer_hor_div = "";
-
+        empty_left_space = "";
     };
 
     TableV2(const std::vector<TableV2Column>& cols) : columns(cols) {
@@ -130,9 +132,6 @@ public:
         unsigned int cur_col = items.size()%columns.size();
 
         items.push_back(value);
-
-
-
 
         if (value.size()>columns[cur_col].width) {
 
@@ -167,10 +166,9 @@ public:
         ver_div = ts.inner_border_col + ts.inner_border_ver_symb + ENDSTY;
         outer_ver_div = ts.outer_border_col+ts.outer_border_ver_symb+ENDSTY;
 
-
-
         hor_div = outer_ver_div + ts.inner_border_col + std::string(table_width-2, ts.inner_border_hor_symb) + outer_ver_div;
         outer_hor_div = ts.outer_border_col + std::string(table_width, ts.outer_border_hor_symb) + ENDSTY;
+
     }
 
     void render_header() {
@@ -181,8 +179,10 @@ public:
             return;
         }
 
+        header_render=empty_left_space;
+
         if (ts.has_borders) {
-            header_render.append( outer_hor_div + "\n" + outer_ver_div);
+            header_render.append( outer_hor_div + "\n" + empty_left_space + outer_ver_div);
         };
 
         for (size_t i = 0; i < columns.size(); ++i) {
@@ -196,13 +196,16 @@ public:
         }
         if (ts.has_borders) {
 
-            header_render.append( outer_ver_div + "\n" + outer_hor_div + "\n");
+            header_render.append( outer_ver_div + "\n" + empty_left_space + outer_hor_div + "\n");
         };
     }
 
     void render() {
 
         recalcTableWidth();
+        recalcLeftSpace();
+        empty_left_space=std::string(left_space_width, ' ');
+
 
         if (ts.has_borders) {
             render_borders();
@@ -215,7 +218,7 @@ public:
         page_renders.clear();
 
         unsigned short col_amount = columns.size();
-        unsigned int rows = std::ceil(items.size()/col_amount);
+        row_amount = std::ceil(items.size()/col_amount);
         unsigned int items_amount = items.size();
 
 
@@ -223,7 +226,13 @@ public:
 
         unsigned int per_page_counter = 0;
 
-        for (int r = 0; r < rows; ++r, ++per_page_counter) {
+        for (int r = 0; r < row_amount; ++r, ++per_page_counter) {
+
+            if (ts.is_numbered) {
+                cur_page << padString(std::to_string(r+1)+".", left_space_width, ts.padding_symb, true) ;
+            }else {
+                cur_page << empty_left_space;
+            }
 
             if (ts.has_borders) cur_page <<  outer_ver_div ;
 
@@ -284,9 +293,19 @@ public:
 
     }
 
-    void show() {
+    unsigned int show(bool picker=false, std::string question = "Pick ID") {
+
+        ts=base_ts;
+
+        if (picker) {
+            ts.outer_border_col=WHITESTY;
+            ts.outer_border_hor_symb='?';
+            ts.outer_border_ver_symb='?';
+        }
+
         render();
 
+        int picked_index = -1;
         int cur_page=1;
 
         bool show_table = true;
@@ -294,15 +313,28 @@ public:
         do {
             clearConsole();
 
+            if (picker) {
+                std::cout << BGGREENSTY << padString(question, table_width+left_space_width, ' ', true) << ENDSTY << "\n" ;
+            }
+
             if (ts.has_header) {
                 std::cout << header_render;
             }
             std::cout << page_renders[cur_page-1];
 
-            if (ts.has_borders) std::cout << outer_hor_div;
+            if (ts.has_borders) std::cout << empty_left_space << outer_hor_div;
 
             std::cout << GREENSTY BOLDSTY "\nPage " << cur_page << " from " << page_renders.size() << ENDSTY;
-            std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2 (exit)" << std::endl;
+            std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2" ;
+
+            if (picker) {
+                std::cout << " (pick)";
+            }else {
+                std::cout << " (exit)";
+            }
+
+            std::cout << "\n";
+
 
             int user_choice=getIntFromUser(-2, page_renders.size(), ">", true, true);
 
@@ -315,9 +347,19 @@ public:
                     if (cur_page!=1) cur_page-=1;
                     break;
                 case -2:
+
+
+
+                    if (picker) {
+                        picked_index=getIntFromUser(1, row_amount, "Write the number of the item:", true, true);
+                        show_table=false;
+                        break;
+                    }
+
                     if (getConfirmationFromUser("Do you want to close the table?")) {
                         show_table=false;
                     }
+
                     break;
                 default:
                     cur_page=user_choice;
@@ -326,6 +368,9 @@ public:
 
         } while (show_table);
 
-    }
+
+        return picked_index-1;
+
+    };
 };
 #endif //BESTIARYCPP_TABLEV2_H

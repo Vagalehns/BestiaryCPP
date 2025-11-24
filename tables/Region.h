@@ -13,7 +13,6 @@
 struct Region : DefaultStruct {
     FirstLevelRegion first_level_region;
     std::string name;
-    KeyID ID;
 
     void display() {
         std::cout << "\n Name: " << name ;
@@ -98,55 +97,36 @@ public:
         }
     }
 
-        bool inputForm() override {
+        bool inputForm(Region &new_object) override {
 
-            Region new_region;
-            bool confirm;
+                new_object.name=getStringFromUser("Write region name you want to add", true);
 
-            do {
-                clearConsole();
+                new_object.first_level_region= (FirstLevelRegion) getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!");
 
-                new_region.name=getStringFromUser("Write region name you want to add", true);
-
-                new_region.first_level_region= (FirstLevelRegion) getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!");
-
-                clearConsole();
-                std::cout<<"Do you want to add?";
-                new_region.display();
-                confirm = getConfirmationFromUser(">");
-
-
-
-                if (!confirm) {
-                    std::cout<<"Do you want to cancel?";
-                    if (getConfirmationFromUser(">")) {
-                        return false;
-                    }
-                }
-
-            } while (!confirm);
-
-            appendAutoID(new_region);
-            return true;
+                return true;
         };
 
+        void baseView() {
+            display({{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}},
+                [](TableV2& t, Region& r) {
+                t.addItem(r.ID);
+                t.addItem(r.name);
+                t.addItem(FirstLevelRegionStrings[r.first_level_region]);
+            });
+        }
 
-        void display(bool hide_filtered) override {
+        KeyID pickByUser() override {
+            KeyID id_picked=display({{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}},
+                    [](TableV2& t, Region& r) {
+                    t.addItem(r.ID);
+                    t.addItem(r.name);
+                    t.addItem(FirstLevelRegionStrings[r.first_level_region]);
+                }, false, true, "Pick a region from the table");
 
-            TableV2 table({{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'} });
 
-            for (int i = 0; i < counter; i++) {
+            return data[id_picked].ID;
+        }
 
-                if (data[i].filtered_out && hide_filtered) continue;
-
-                table.addItem(data[i].ID);
-                table.addItem(data[i].name);
-                table.addItem(FirstLevelRegionStrings[data[i].first_level_region]);
-            }
-
-            table.show();
-
-        };
 
         std::string convertToCSV() override {return "";};
         Region getFromCSVline(std::string CSV_line) override {return Region();};

@@ -12,7 +12,7 @@
 #include "../TUI_functions.h"
 
 #include "dbParameters.h"
-
+#include "tableV2.h"
 
 
 typedef unsigned int KeyID;
@@ -27,6 +27,10 @@ struct DefaultStruct {
     };
 
     DefaultStruct(KeyID id) : ID(id) {};
+
+    void display() {
+
+    };
 
 };
 
@@ -72,6 +76,7 @@ class DB {
 
     public:
         DT data[MaxData];
+
 
         template <typename T, typename Pred>
         void order(T DT::* memberPtr, Pred pred) {
@@ -242,19 +247,57 @@ class DB {
 
             }
 
-        virtual void display(bool hide_filtered=true)=0;
+        int display(std::vector<TableV2Column> cols, std::function<void(TableV2&, DT&)> addItems, bool hide_filtered=true, bool picker=false, std::string question="") {
+
+            TableV2 table(cols);
+
+            for (int i = 0; i < counter; i++) {
+
+                if (data[i].filtered_out && hide_filtered) continue;
+
+                addItems(table, data[i]);
+            }
+
+
+            return table.show(picker, question);
+
+        };
 
         bool addByForm() {
             if (isFull()) {
                 return false;
             }
 
-            return inputForm();
+            DT new_dt;
+            bool confirm;
+
+            do {
+                clearConsole();
+
+                inputForm(new_dt);
+
+                clearConsole();
+                std::cout<<"Do you want to add?";
+                new_dt.display();
+                confirm = getConfirmationFromUser(">");
+
+                if (!confirm) {
+                    std::cout<<"Do you want to cancel?";
+                    if (getConfirmationFromUser(">")) {
+                        return false;
+                    }
+                }
+
+            } while (!confirm);
+
+            appendAutoID(new_dt);
+            return true;
         }
 
 
         virtual std::string convertToCSV()=0;
-        virtual bool inputForm()=0;
+        virtual KeyID pickByUser()=0;
+        virtual bool inputForm(DT &new_object)=0;
 
 };
 

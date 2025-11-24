@@ -14,7 +14,8 @@
     #define SLASH '/'
 #endif
 
-#define MAX_REGIONS 4
+#define MAX_REGIONS 40
+#define MAX_SPECIES 30
 
 
 enum FirstLevelRegion {
@@ -49,6 +50,17 @@ constexpr std::array<const char*, 13> FirstLevelRegionStrings = {
     "OCEANS"
 };
 
-
+constexpr std::array<const char*, 10> SpeciesEmojiIcons = {
+    "🦁", // Lion (Big Cats/Predators)
+    "🐘", // Elephant (Large Herbivores)
+    "🐒", // Monkey (Primates)
+    "🐼", // Panda (Bears/Specialty)
+    "🦒", // Giraffe (Savanna animals)
+    "🦓", // Zebra (Equines)
+    "🐧", // Penguin (Aquatic Birds/Cold climate)
+    "🐊", // Crocodile (Amphibious Reptiles)
+    "🐍", // Snake (Reptiles/Vivariums)
+    "🦩"  // Flamingo (Avian/Exotic Birds)
+};
 
 #endif //BESTIARYCPP_TABLESPARAMETERS_H

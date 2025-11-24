@@ -3,9 +3,11 @@
 #include <fstream>
 
 #include "BestiaryApp.h"
-#include "tables/Region.h"
+#include <windows.h>
 
 int main(int argc, char **argv) {
+
+    SetConsoleOutputCP(CP_UTF8);
 
     AppState appState;
 

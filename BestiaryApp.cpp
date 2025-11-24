@@ -13,6 +13,14 @@ inline bool echo(const std::string &str ){
 
 
 BestiaryApp::BestiaryApp(AppState state) :
+
+    speciesDB( [this](KeyID id) -> Region* {
+        return regionDB.getByID(id);
+    },
+    [this]() -> KeyID {
+        return regionDB.pickByUser();
+    }),
+
     menu_start("Main menu", "Exit"),
     menu_add_data("Add data", "Back"),
     menu_view_data("View data", "Back"){
@@ -22,22 +30,39 @@ BestiaryApp::BestiaryApp(AppState state) :
 
     menu_add_data.addItem({"Add region", [this]()->MenuReturn {
 
-        if (regionDB.addByForm()) {
-            return MenuReturn(STAY_SHOW_MSG, "Region added");
-        }else {
-            return MenuReturn(STAY_SHOW_ERROR, "Failed to add region");
-        }
+            if (regionDB.addByForm()) {
+                return MenuReturn(STAY_SHOW_MSG, "Region added");
+            }else {
+                return MenuReturn(STAY_SHOW_ERROR, "Failed to add region");
+            }
 
     }});
 
-    menu_add_data.addItem({"Add species", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_add_data.addItem({"Add species", [this]()->MenuReturn {
+
+            if (speciesDB.addByForm()) {
+                return MenuReturn(STAY_SHOW_MSG, "Species added");
+            }else {
+                return MenuReturn(STAY_SHOW_ERROR, "Failed to add species");
+            }
+
+    }});
+
     menu_add_data.addItem({"Add animal", []()->MenuReturn{return MenuReturn(STAY);}});
     menu_add_data.addItem({"Add keeper", []()->MenuReturn{return MenuReturn(STAY);}});
     menu_add_data.addItem({"Add enclosure", []()->MenuReturn{return MenuReturn(STAY);}});
     menu_add_data.addItem({"Add feeding", []()->MenuReturn{return MenuReturn(STAY);}});
 
-    menu_view_data.addItem({"View region", []()->MenuReturn{return MenuReturn(STAY);}});
-    menu_view_data.addItem({"View species", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_view_data.addItem({"View region", [this]()->MenuReturn {
+        regionDB.baseView();
+        return MenuReturn(STAY);
+    }});
+
+    menu_view_data.addItem({"View species", [this]()->MenuReturn {
+        speciesDB.baseView();
+        return MenuReturn(STAY);
+    }});
+
     menu_view_data.addItem({"View animal", []()->MenuReturn{return MenuReturn(STAY);}});
     menu_view_data.addItem({"View keeper", []()->MenuReturn{return MenuReturn(STAY);}});
     menu_view_data.addItem({"View enclosure", []()->MenuReturn{return MenuReturn(STAY);}});

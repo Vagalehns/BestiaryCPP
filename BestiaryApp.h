@@ -7,6 +7,7 @@
 
 #include "TUI_functions.h"
 #include "tables/Region.h"
+#include "tables/Species.h"
 
 #include "TUI_functions/Menu.h"
 
@@ -27,6 +28,7 @@ class BestiaryApp {
         AppState State;
 
         RegionDB regionDB;
+        SpeciesDB speciesDB;
 
         explicit BestiaryApp(AppState state);
 
