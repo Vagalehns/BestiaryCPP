@@ -99,6 +99,7 @@ public:
     }
 
         bool inputForm() override {
+
             Region new_region;
             bool confirm;
 

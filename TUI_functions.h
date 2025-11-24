@@ -13,8 +13,6 @@
 #include <string>
 #include <vector>
 
-#include "styling_functions.h"
-
 void clearConsole();
 
 std::string generateTable(std::vector<std::string> data, int columns, bool borders=false);
@@ -60,33 +58,6 @@ int getOptionFromUser(const std::array<const char*, N>& options, std::string que
 }
 
 
-typedef struct  {
-    std::string title;
-    std::function<bool()> screen_to_call;
-} MenuItem;
-
-class Menu {
-    public:
-        MenuItem menu_items[MAX_MENU_ITEMS];
-        char item_count=0;
-        std::string menu_title;
-        bool should_close=false;
-
-        explicit Menu(std::string title, std::string exit_name="Back");
-
-
-        bool addItem(MenuItem item);
-
-        void open();
-        void open(bool clear);
-
-        bool close();
-
-    private:
-        int translateFromUserToIndex(int user_sel) const {
-            return item_count-user_sel;
-        }
-};
 
 
 #endif //BESTIARYCPP_TUI_FUNCTIONS_H

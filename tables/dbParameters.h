@@ -6,7 +6,7 @@
 #define BESTIARYCPP_TABLESPARAMETERS_H
 
 #define CSV_SEPERATOR ','
-#define TOO_MANY_ITERS 1000
+#define TOO_MANY_ITERS 100000
 
 #ifdef _WIN32
     #define SLASH '\\'
@@ -14,7 +14,7 @@
     #define SLASH '/'
 #endif
 
-#define MAX_REGIONS 40
+#define MAX_REGIONS 4
 
 
 enum FirstLevelRegion {

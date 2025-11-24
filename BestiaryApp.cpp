@@ -3,7 +3,6 @@
 //
 
 #include "BestiaryApp.h"
-
 #include "info.h"
 #include "styling_functions.h"
 
@@ -13,17 +12,39 @@ inline bool echo(const std::string &str ){
 };
 
 
-BestiaryApp::BestiaryApp(AppState state) : StartMenu("Main Menu", "Exit") {
+BestiaryApp::BestiaryApp(AppState state) :
+    menu_start("Main menu", "Exit"),
+    menu_add_data("Add data", "Back"),
+    menu_view_data("View data", "Back"){
+
 
     State = state;
 
-    StartMenu.addItem({"Add animal species", [](){return echo("Item 1 called");} });
-    StartMenu.addItem({"Item 2", [](){ return echo("Item 2 called"); }});
-    StartMenu.addItem({"Item 3", [](){ return echo("Item 3 called"); }});
-    StartMenu.addItem({"Item 4", [](){ return echo("Item 4 called"); }});
-    StartMenu.addItem({"Item 5", [](){ return echo("Item 5 called"); }});
-    StartMenu.addItem({"Item 6", [](){ return echo("Item 6 called"); }});
+    menu_add_data.addItem({"Add region", [this]()->MenuReturn {
 
+        if (regionDB.addByForm()) {
+            return MenuReturn(STAY_SHOW_MSG, "Region added");
+        }else {
+            return MenuReturn(STAY_SHOW_ERROR, "Failed to add region");
+        }
+
+    }});
+
+    menu_add_data.addItem({"Add species", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_add_data.addItem({"Add animal", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_add_data.addItem({"Add keeper", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_add_data.addItem({"Add enclosure", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_add_data.addItem({"Add feeding", []()->MenuReturn{return MenuReturn(STAY);}});
+
+    menu_view_data.addItem({"View region", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_view_data.addItem({"View species", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_view_data.addItem({"View animal", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_view_data.addItem({"View keeper", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_view_data.addItem({"View enclosure", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_view_data.addItem({"View feeding", []()->MenuReturn{return MenuReturn(STAY);}});
+
+    menu_start.addItem({"Add data", [this]()->MenuReturn{return this->menu_add_data.open();}});
+    menu_start.addItem({"View data", [this]()->MenuReturn{return this->menu_view_data.open();}});
 }
 
 bool BestiaryApp::Run() {
@@ -37,8 +58,10 @@ bool BestiaryApp::Run() {
         Splashscreen();
     }
 
-    StartMenu.open();
+    menu_start.open();
+
     std::cout << "App Closed";
+
     return true;
 }
 

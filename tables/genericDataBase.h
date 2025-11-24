@@ -166,9 +166,15 @@ class DB {
             return append(new_data);
         }
 
+        bool isFull() {
+            return counter>=MaxData;
+        }
+
+
+
         bool append(DT new_data) {
 
-            if (counter>=MaxData) {
+            if (isFull()) {
                 return false;
             }
 
@@ -237,6 +243,14 @@ class DB {
             }
 
         virtual void display(bool hide_filtered=true)=0;
+
+        bool addByForm() {
+            if (isFull()) {
+                return false;
+            }
+
+            return inputForm();
+        }
 
 
         virtual std::string convertToCSV()=0;

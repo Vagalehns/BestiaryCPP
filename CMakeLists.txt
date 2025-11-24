@@ -13,8 +13,10 @@ add_executable(BestiaryCPP main.cpp
         formFunctions.cpp
         formFunctions.h
         tables/genericDataBase.h
-        tables/Region.cpp
         tables/Region.h
         tables/dbParameters.h
         tables/tableV2.h
+        TUI_functions/Menu.cpp
+        TUI_functions/Menu.h
+        tables/Species.h
 )

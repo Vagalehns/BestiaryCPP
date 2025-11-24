@@ -301,8 +301,8 @@ public:
 
             if (ts.has_borders) std::cout << outer_hor_div;
 
-            std::cout << "\nPage " << cur_page << " from " << page_renders.size();
-            std::cout << "\nSelect page number, or use 0 (next), -1 (prev), -2 (exit)" << std::endl;
+            std::cout << GREENSTY BOLDSTY "\nPage " << cur_page << " from " << page_renders.size() << ENDSTY;
+            std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2 (exit)" << std::endl;
 
             int user_choice=getIntFromUser(-2, page_renders.size(), ">", true, true);
 

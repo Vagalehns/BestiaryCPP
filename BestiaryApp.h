@@ -6,12 +6,11 @@
 #define BESTIARYCPP_BESTIARYAPP_H
 
 #include "TUI_functions.h"
+#include "tables/Region.h"
 
-
+#include "TUI_functions/Menu.h"
 
 inline bool echo(const std::string &str );
-
-
 
 typedef struct{
     bool nofuzz=false;
@@ -23,10 +22,11 @@ class BestiaryApp {
 
     public:
 
-        Menu StartMenu;
+        Menu menu_start, menu_add_data, menu_view_data;
+
         AppState State;
 
-
+        RegionDB regionDB;
 
         explicit BestiaryApp(AppState state);
 
