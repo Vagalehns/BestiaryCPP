@@ -5,9 +5,9 @@
 #ifndef BESTIARYCPP_REGION_H
 #define BESTIARYCPP_REGION_H
 
-#include "genericDataBase.h"
-#include "tableV2.h"
-#include "../TUI_functions.h"
+#include "../genericDataBase.h"
+#include "../tableV2.h"
+#include "../../TUI_functions.h"
 
 
 struct Region : DefaultStruct {
@@ -87,9 +87,12 @@ inline std::vector<Region> getDefaultBroadRegions() {
 };
 
 class RegionDB : public DB<Region, MAX_REGIONS> {
+
+
 public:
 
     RegionDB ( bool add_defaults=true) {
+
         if (add_defaults) {
             for (auto region: getDefaultBroadRegions()) {
                 appendAutoID(region);
@@ -106,30 +109,47 @@ public:
                 return true;
         };
 
-        void baseView() {
-            display({{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}},
-                [](TableV2& t, Region& r) {
+
+        std::vector<TableV2Column> getBaseViewColums() override {
+                return {{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}};
+            };
+
+        std::function<void(TableV2&, Region&)> getBaseViewAddItemsFunc() override {
+            return [](TableV2& t, Region& r) {
                 t.addItem(r.ID);
                 t.addItem(r.name);
                 t.addItem(FirstLevelRegionStrings[r.first_level_region]);
-            });
-        }
+            };
+        };
 
-        KeyID pickByUser() override {
-            KeyID id_picked=display({{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}},
-                    [](TableV2& t, Region& r) {
-                    t.addItem(r.ID);
-                    t.addItem(r.name);
-                    t.addItem(FirstLevelRegionStrings[r.first_level_region]);
-                }, false, true, "Pick a region from the table");
+        std::string convertToCSVLine(int index) override {
+            std::stringstream ss;
+            ss<<data[index].ID<<CSV_SEP<<data[index].name<<CSV_SEP<<data[index].first_level_region;
+            return ss.str();
+        };
 
+        std::string getCSVHeader() override {
+            std::stringstream ss;
+            ss << "ID" << CSV_SEP << "Name" << CSV_SEP << "First level region";
+            return ss.str();
+        };
 
-            return data[id_picked].ID;
-        }
+        Region getFromCSVline(std::string CSV_line) override {
+            std::string name, temp;
+            std::stringstream ss(CSV_line);
+            Region new_region;
 
+            std::getline(ss, temp, CSV_SEP);
+            new_region.ID = std::stoi(temp);
 
-        std::string convertToCSV() override {return "";};
-        Region getFromCSVline(std::string CSV_line) override {return Region();};
+            std::getline(ss, temp, CSV_SEP);
+            new_region.name = temp;
+
+            std::getline(ss, temp, CSV_SEP);
+            new_region.first_level_region = (FirstLevelRegion) std::stoi(temp);
+
+            return new_region;
+        };
 };
 
 #endif //BESTIARYCPP_REGION_H

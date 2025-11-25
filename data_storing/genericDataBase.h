@@ -6,7 +6,6 @@
 #define BESTIARYCPP_ANIMALFUNCTIONS_H
 
 #include <fstream>
-#include <sstream>
 #include <string>
 
 #include "../TUI_functions.h"
@@ -68,6 +67,8 @@ template<typename DT, unsigned int MaxData>
 class DB {
 
     static_assert(std::is_base_of<DefaultStruct, DT>::value);
+
+
 
     protected:
         unsigned int counter = 0;
@@ -175,6 +176,10 @@ class DB {
             return counter>=MaxData;
         }
 
+        bool isEmpty() {
+            return counter==0;
+        }
+
 
 
         bool append(DT new_data) {
@@ -212,7 +217,11 @@ class DB {
                 return false;
             }
 
-            out_file << convertToCSV();
+            out_file<<getCSVHeader()<<std::endl;
+            for (int i = 0; i < counter; i++) {
+                out_file << convertToCSVLine(i) << std::endl;
+            }
+
             out_file.close();
 
             return true;
@@ -220,7 +229,7 @@ class DB {
 
         void clearData() {
                 counter = 0;
-                ID_counter = 0;
+                ID_counter = 1;
             }
 
         bool readFromCSVFile(std::string filename, std::string location, bool clear=true) {
@@ -237,6 +246,7 @@ class DB {
                 }
 
                 std::string line;
+                std::getline(in_file, line); // Skip header
                 while (std::getline(in_file, line)) {
                     append(getFromCSVline(line));
                 }
@@ -264,17 +274,24 @@ class DB {
         };
 
         bool addByForm() {
+
             if (isFull()) {
                 return false;
             }
 
             DT new_dt;
-            bool confirm;
+            bool confirm = false;
+            bool impossible = false;
 
             do {
                 clearConsole();
 
-                inputForm(new_dt);
+                bool form_success = inputForm(new_dt);
+
+                if (!form_success) {
+                    impossible=true;
+                    continue;
+                }
 
                 clearConsole();
                 std::cout<<"Do you want to add?";
@@ -288,15 +305,41 @@ class DB {
                     }
                 }
 
-            } while (!confirm);
+            } while (!confirm && !impossible);
+
+            if (impossible) {
+                return false;
+            }
 
             appendAutoID(new_dt);
             return true;
         }
 
 
-        virtual std::string convertToCSV()=0;
-        virtual KeyID pickByUser()=0;
+        virtual std::string convertToCSVLine(int index)=0;
+        virtual std::string getCSVHeader()=0;
+
+        virtual KeyID pickByUser(bool &successful){
+
+            if (isEmpty()) {
+                successful = false;
+                return 0;
+            }else {
+                successful = true;
+            }
+
+            KeyID id_picked=display(getBaseViewColums(), getBaseViewAddItemsFunc(), false, true, "Pick from the table");
+            return data[id_picked].ID;
+        };
+
+        void baseView() {
+            display(getBaseViewColums(), getBaseViewAddItemsFunc());
+        }
+
+
+        virtual std::vector<TableV2Column> getBaseViewColums()=0;
+        virtual std::function<void(TableV2&, DT&)> getBaseViewAddItemsFunc()=0;
+
         virtual bool inputForm(DT &new_object)=0;
 
 };

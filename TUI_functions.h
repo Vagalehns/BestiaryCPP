@@ -27,6 +27,7 @@ std::string padString(std::string string_to_pad, unsigned short new_size, char p
 
 std::string getStringFromUser(const std::string &question, bool with_confirmation, std::string unallowed_chars);
 std::string getStringFromUser(const std::string &question, bool with_confirmation);
+std::string getStringFromUserWithPattern(const std::string &question, std::string error_message, std::function<bool(std::string)> checkFunc);
 
 void resetListItem();
 void printListItem(std::string item, bool reset);

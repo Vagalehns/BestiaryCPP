@@ -9,12 +9,26 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <sstream>
 
-#include "genericDataBase.h"
-#include "genericDataBase.h"
+
 #include "../styling_functions.h"
 
 #define MAX_PAGE_SIZE 14
+
+// Gemini 2.5
+inline size_t utf8_code_point_count(const std::string& s) {
+
+    size_t count = 0;
+    for (char c : s) {
+
+        // UTF-8 lead bytes (bytes that start a new code point)
+        if ((c & 0xC0) != 0x80) {
+            count++;
+        }
+    }
+    return count;
+}
 
 
 struct TableV2Column {
@@ -37,7 +51,7 @@ struct TableV2Style {
     bool type_colored=true;
     bool centered=true;
     bool has_hor_div=false;
-    bool is_numbered=true;
+    bool is_numbered=false;
 
     unsigned char extra_padding=4;
 
@@ -133,9 +147,11 @@ public:
 
         items.push_back(value);
 
-        if (value.size()>columns[cur_col].width) {
+        size_t value_size = utf8_code_point_count(value);
 
-            columns[cur_col].width = value.size();
+        if (value_size>columns[cur_col].width) {
+
+            columns[cur_col].width = value_size;
         }
     }
 
@@ -301,6 +317,7 @@ public:
             ts.outer_border_col=WHITESTY;
             ts.outer_border_hor_symb='?';
             ts.outer_border_ver_symb='?';
+            ts.is_numbered=true;
         }
 
         render();

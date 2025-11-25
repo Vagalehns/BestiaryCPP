@@ -174,4 +174,21 @@ std::string getStringFromUser(const std::string &question, bool with_confirmatio
 std::string getStringFromUser(const std::string &question, bool with_confirmation) {
     return getStringFromUser(question, with_confirmation, "");
 }
+std::string getStringFromUserWithPattern(const std::string &question, std::string error_message, std::function<bool(std::string)> checkFunc) {
+
+    std::string user_string;
+    bool correct=false;
+
+
+    do {
+        user_string = getStringFromUser(question, false);
+        correct = checkFunc(user_string);
+        if (!correct) {
+            std::cout<<error_message<<"\n";
+        }
+    } while (!correct);
+
+    return user_string;
+
+};
 

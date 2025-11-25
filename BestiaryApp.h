@@ -6,8 +6,11 @@
 #define BESTIARYCPP_BESTIARYAPP_H
 
 #include "TUI_functions.h"
-#include "tables/Region.h"
-#include "tables/Species.h"
+#include "data_storing/databases/Enclosure.h"
+#include "data_storing/databases/Keeper.h"
+#include "data_storing/databases/Region.h"
+#include "data_storing/databases/Species.h"
+#include "data_storing/databases/Animal.h"
 
 #include "TUI_functions/Menu.h"
 
@@ -23,12 +26,19 @@ class BestiaryApp {
 
     public:
 
-        Menu menu_start, menu_add_data, menu_view_data;
+        Menu menu_start,
+             menu_add_data,
+             menu_view_data,
+             menu_load_data,
+             menu_save_data;
 
         AppState State;
 
         RegionDB regionDB;
         SpeciesDB speciesDB;
+        KeeperDB keeperDB;
+        EnclosureDB enclosureDB;
+        AnimalDB animalDB;
 
         explicit BestiaryApp(AppState state);
 

@@ -1,0 +1,25 @@
+Fix all the forms
+    Add missing forms
+        Decide on missing datafields
+    Improve looks
+    Add specific errors
+
+Add loading and saving specific way
+    Create function to get path from user
+
+Reorganize the files
+    Move implementations outside the definitions
+
+Decide on bast way to allow user organize table, filter etc
+
+Contact professor
+
+Fix emoji display ( emoji is counted as three chars instead of one and that breaks tables )
+
+Add deletion
+
+Add feeding tables
+
+Implement unit testing
+
+Define text outside the code

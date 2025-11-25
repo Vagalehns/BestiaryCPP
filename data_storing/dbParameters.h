@@ -5,7 +5,7 @@
 #ifndef BESTIARYCPP_TABLESPARAMETERS_H
 #define BESTIARYCPP_TABLESPARAMETERS_H
 
-#define CSV_SEPERATOR ','
+#define CSV_SEP ','
 #define TOO_MANY_ITERS 100000
 
 #ifdef _WIN32
@@ -16,6 +16,9 @@
 
 #define MAX_REGIONS 40
 #define MAX_SPECIES 30
+#define MAX_KEEPERS 25
+#define MAX_ENCLOSURE 50
+#define MAX_ANIMALS 100
 
 
 enum FirstLevelRegion {
@@ -61,6 +64,11 @@ constexpr std::array<const char*, 10> SpeciesEmojiIcons = {
     "🐊", // Crocodile (Amphibious Reptiles)
     "🐍", // Snake (Reptiles/Vivariums)
     "🦩"  // Flamingo (Avian/Exotic Birds)
+};
+
+constexpr std::array<const char*, 2> EnclosuresTypes = {
+    "Aquarium",
+    "Cage"
 };
 
 #endif //BESTIARYCPP_TABLESPARAMETERS_H

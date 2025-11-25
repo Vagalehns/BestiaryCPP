@@ -12,11 +12,14 @@ add_executable(BestiaryCPP main.cpp
         BestiaryApp.h
         formFunctions.cpp
         formFunctions.h
-        tables/genericDataBase.h
-        tables/Region.h
-        tables/dbParameters.h
-        tables/tableV2.h
+        data_storing/genericDataBase.h
+        data_storing/databases/Region.h
+        data_storing/dbParameters.h
+        data_storing/tableV2.h
         TUI_functions/Menu.cpp
         TUI_functions/Menu.h
-        tables/Species.h
+        data_storing/databases/Species.h
+        data_storing/databases/Keeper.h
+        data_storing/databases/Enclosure.h
+        data_storing/databases/Animal.h
 )

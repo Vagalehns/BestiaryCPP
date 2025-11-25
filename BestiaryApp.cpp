@@ -11,65 +11,91 @@ inline bool echo(const std::string &str ){
     return true;
 };
 
+template<class DB>
+auto makeAdd(DB& db, std::string func_name) {
+    return [&, func_name]() -> MenuReturn {
+        if (db.addByForm())
+            return {STAY_SHOW_MSG, func_name + " added"};
+        else
+            return {STAY_SHOW_ERROR, "Failed to add " + func_name};
+    };
+}
+
+template<class DB>
+auto makeView(DB& db) {
+    return [&]() -> MenuReturn {
+        db.baseView();
+        return {STAY, ""};
+    };
+}
+
+
 
 BestiaryApp::BestiaryApp(AppState state) :
 
-    speciesDB( [this](KeyID id) -> Region* {
-        return regionDB.getByID(id);
-    },
-    [this]() -> KeyID {
-        return regionDB.pickByUser();
-    }),
+    speciesDB(
+        std::bind_front(&RegionDB::getByID, &regionDB),
+        std::bind_front(&RegionDB::pickByUser, &regionDB)
+    ),
+
+    animalDB(
+        std::bind_front(&SpeciesDB::getByID, &speciesDB),
+        std::bind_front(&SpeciesDB::pickByUser, &speciesDB),
+
+        std::bind_front(&KeeperDB::getByID, &keeperDB),
+        std::bind_front(&KeeperDB::pickByUser, &keeperDB),
+
+        std::bind_front(&EnclosureDB::getByID, &enclosureDB),
+        std::bind_front(&EnclosureDB::pickByUser, &enclosureDB)
+    ),
 
     menu_start("Main menu", "Exit"),
     menu_add_data("Add data", "Back"),
-    menu_view_data("View data", "Back"){
+    menu_view_data("View data", "Back"),
+    menu_load_data("Load data", "Back"),
+    menu_save_data("Save data", "Back"){
 
 
     State = state;
 
-    menu_add_data.addItem({"Add region", [this]()->MenuReturn {
-
-            if (regionDB.addByForm()) {
-                return MenuReturn(STAY_SHOW_MSG, "Region added");
-            }else {
-                return MenuReturn(STAY_SHOW_ERROR, "Failed to add region");
-            }
-
+    menu_save_data.addItem({"Save EVERYTGING!!!", [this]()->MenuReturn {
+            const std::string loc = "C:\\Users\\arman\\Desktop\\Test";
+            this->animalDB.saveToCSVFile("animaldb", loc);
+            this->enclosureDB.saveToCSVFile("enclosuredb", loc);
+            this->keeperDB.saveToCSVFile("keeperdb", loc);
+            this->regionDB.saveToCSVFile("regiondb", loc);
+            this->speciesDB.saveToCSVFile("speciesdb", loc);
+            return {STAY_SHOW_MSG, ":)"};
     }});
 
-    menu_add_data.addItem({"Add species", [this]()->MenuReturn {
-
-            if (speciesDB.addByForm()) {
-                return MenuReturn(STAY_SHOW_MSG, "Species added");
-            }else {
-                return MenuReturn(STAY_SHOW_ERROR, "Failed to add species");
-            }
-
+    menu_load_data.addItem({"Load EVERYTGING!!!", [this]()->MenuReturn {
+            const std::string loc = "C:\\Users\\arman\\Desktop\\Test";
+            this->animalDB.readFromCSVFile("animaldb", loc);
+            this->enclosureDB.readFromCSVFile("enclosuredb", loc);
+            this->keeperDB.readFromCSVFile("keeperdb", loc);
+            this->speciesDB.readFromCSVFile("speciesdb", loc);
+            this->regionDB.readFromCSVFile("regiondb", loc);
+            return {STAY_SHOW_MSG, ":)"};
     }});
 
-    menu_add_data.addItem({"Add animal", []()->MenuReturn{return MenuReturn(STAY);}});
-    menu_add_data.addItem({"Add keeper", []()->MenuReturn{return MenuReturn(STAY);}});
-    menu_add_data.addItem({"Add enclosure", []()->MenuReturn{return MenuReturn(STAY);}});
-    menu_add_data.addItem({"Add feeding", []()->MenuReturn{return MenuReturn(STAY);}});
+    menu_add_data.addItem({"Add region",    makeAdd(regionDB, "Region")});
+    menu_add_data.addItem({"Add species",   makeAdd(speciesDB, "Species")});
+    menu_add_data.addItem({"Add animal",    makeAdd(animalDB, "Animal")});
+    menu_add_data.addItem({"Add keeper",    makeAdd(keeperDB, "Keeper")});
+    menu_add_data.addItem({"Add enclosure", makeAdd(enclosureDB, "Enclosure")});
 
-    menu_view_data.addItem({"View region", [this]()->MenuReturn {
-        regionDB.baseView();
-        return MenuReturn(STAY);
-    }});
+    menu_view_data.addItem({"View region",    makeView(regionDB)});
+    menu_view_data.addItem({"View species",   makeView(speciesDB)});
+    menu_view_data.addItem({"View animal",    makeView(animalDB)});
+    menu_view_data.addItem({"View keeper",    makeView(keeperDB)});
+    menu_view_data.addItem({"View enclosure", makeView(enclosureDB)});
 
-    menu_view_data.addItem({"View species", [this]()->MenuReturn {
-        speciesDB.baseView();
-        return MenuReturn(STAY);
-    }});
-
-    menu_view_data.addItem({"View animal", []()->MenuReturn{return MenuReturn(STAY);}});
-    menu_view_data.addItem({"View keeper", []()->MenuReturn{return MenuReturn(STAY);}});
-    menu_view_data.addItem({"View enclosure", []()->MenuReturn{return MenuReturn(STAY);}});
     menu_view_data.addItem({"View feeding", []()->MenuReturn{return MenuReturn(STAY);}});
 
     menu_start.addItem({"Add data", [this]()->MenuReturn{return this->menu_add_data.open();}});
     menu_start.addItem({"View data", [this]()->MenuReturn{return this->menu_view_data.open();}});
+    menu_start.addItem({"Load data", [this]()->MenuReturn{return this->menu_load_data.open();}});
+    menu_start.addItem({"Save data", [this]()->MenuReturn{return this->menu_save_data.open();}});
 }
 
 bool BestiaryApp::Run() {
