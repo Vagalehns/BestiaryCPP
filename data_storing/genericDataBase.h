@@ -5,7 +5,9 @@
 #ifndef BESTIARYCPP_ANIMALFUNCTIONS_H
 #define BESTIARYCPP_ANIMALFUNCTIONS_H
 
+#include <chrono>
 #include <fstream>
+#include <random>
 #include <string>
 
 #include "../TUI_functions.h"
@@ -70,12 +72,18 @@ class DB {
 
 
 
+
     protected:
         unsigned int counter = 0;
-        KeyID ID_counter = 1;
+        unsigned int seed_value = std::chrono::system_clock::now().time_since_epoch().count();
 
+        std::mt19937 rand_engine;
+        std::uniform_int_distribution<unsigned int> key_dist;
 
     public:
+
+        DB() : rand_engine(seed_value){}
+
         DT data[MaxData];
 
 
@@ -163,10 +171,14 @@ class DB {
             return true;
         }
 
+        KeyID getRandID() {
+            return key_dist(rand_engine);
+        };
+
         bool appendAutoID(DT new_data) {
 
             do {
-                new_data.ID = ID_counter++;
+                new_data.ID = getRandID();
             } while (!checkIUniqueID(new_data.ID));
 
             return append(new_data);
@@ -210,7 +222,7 @@ class DB {
 
         bool saveToCSVFile(std::string filename, std::string location) {
 
-            std::ofstream out_file(location+SLASH+filename+".csv");
+            std::ofstream out_file(location+SLASH+filename);
 
             if (!out_file) {
                 std::cerr << "Error opening file for writing!" << std::endl;
@@ -229,12 +241,11 @@ class DB {
 
         void clearData() {
                 counter = 0;
-                ID_counter = 1;
             }
 
         bool readFromCSVFile(std::string filename, std::string location, bool clear=true) {
 
-                std::ifstream in_file(location+SLASH+filename+".csv");
+                std::ifstream in_file(location+SLASH+filename);
 
                 if (!in_file) {
                     std::cerr << "Failed to open file." << std::endl;
@@ -246,9 +257,20 @@ class DB {
                 }
 
                 std::string line;
-                std::getline(in_file, line); // Skip header
+                std::getline(in_file, line); // Read header
+
+                if (!(line==getCSVHeader())) {
+                    return false;
+                }
+
                 while (std::getline(in_file, line)) {
-                    append(getFromCSVline(line));
+                    DT new_data;
+                    try {
+                        new_data=getFromCSVline(line);
+                    }catch(...) {
+                        return false;
+                    }
+                    append(new_data);
                 }
 
                 in_file.close();

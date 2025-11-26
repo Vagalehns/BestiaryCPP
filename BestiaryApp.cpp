@@ -3,8 +3,17 @@
 //
 
 #include "BestiaryApp.h"
+
+#include "file_functions.h"
 #include "info.h"
 #include "styling_functions.h"
+
+
+#define DEF_ANIMALDB_FILENAME "animal_db.csv"
+#define DEF_ENCLOSUREDB_FILENAME "enclosures_db.csv"
+#define DEF_KEEPERDB_FILENAME "keepers_db.csv"
+#define DEF_SPECIESDB_FILENAME "species_db.csv"
+#define DEF_REGIONDB_FILENAME "regions_db.csv"
 
 inline bool echo(const std::string &str ){
     std::cout << str << std::endl;
@@ -30,6 +39,41 @@ auto makeView(DB& db) {
 }
 
 
+bool BestiaryApp::saveEverything(std::filesystem::path dest) {
+    int saved=0;
+    saved += this->animalDB.saveToCSVFile(DEF_ANIMALDB_FILENAME, dest.string());
+    saved += this->enclosureDB.saveToCSVFile(DEF_ENCLOSUREDB_FILENAME, dest.string());
+    saved += this->keeperDB.saveToCSVFile(DEF_KEEPERDB_FILENAME, dest.string());
+    saved += this->speciesDB.saveToCSVFile(DEF_SPECIESDB_FILENAME, dest.string());
+    saved += this->regionDB.saveToCSVFile(DEF_REGIONDB_FILENAME, dest.string());
+
+    return saved==5;
+};
+
+bool BestiaryApp::loadEverything(std::filesystem::path dest, bool clear_data) {
+
+    if (
+        checkIfFileExists(dest / DEF_ANIMALDB_FILENAME)&&
+        checkIfFileExists(dest / DEF_ENCLOSUREDB_FILENAME)&&
+        checkIfFileExists(dest / DEF_KEEPERDB_FILENAME)&&
+        checkIfFileExists(dest / DEF_SPECIESDB_FILENAME)&&
+        checkIfFileExists(dest / DEF_REGIONDB_FILENAME)
+        ) {
+
+        int loaded=0;
+
+        loaded+=this->animalDB.readFromCSVFile(DEF_ANIMALDB_FILENAME, dest.string(), clear_data);
+        loaded+=this->enclosureDB.readFromCSVFile(DEF_ENCLOSUREDB_FILENAME, dest.string(), clear_data);
+        loaded+=this->keeperDB.readFromCSVFile(DEF_KEEPERDB_FILENAME, dest.string(), clear_data);
+        loaded+=this->speciesDB.readFromCSVFile(DEF_SPECIESDB_FILENAME, dest.string(), clear_data);
+        loaded+=this->regionDB.readFromCSVFile(DEF_REGIONDB_FILENAME, dest.string(), clear_data);
+
+        return loaded==5;
+
+        }else {
+            return false;
+        };
+};
 
 BestiaryApp::BestiaryApp(AppState state) :
 
@@ -58,25 +102,168 @@ BestiaryApp::BestiaryApp(AppState state) :
 
     State = state;
 
-    menu_save_data.addItem({"Save EVERYTGING!!!", [this]()->MenuReturn {
-            const std::string loc = "C:\\Users\\arman\\Desktop\\Test";
-            this->animalDB.saveToCSVFile("animaldb", loc);
-            // this->enclosureDB.saveToCSVFile("enclosuredb", loc);
-            this->keeperDB.saveToCSVFile("keeperdb", loc);
-            // this->regionDB.saveToCSVFile("regiondb", loc);
-            // this->speciesDB.saveToCSVFile("speciesdb", loc);
-            return {STAY_SHOW_MSG, ":)"};
+    menu_save_data.addItem({"Save to zip", [this]()->MenuReturn {
+
+            auto dest=getPathFromUser("Where to save?", true);
+            ensureFolderExists(dest);
+
+            auto filename=getStringFromUser("Input file name", true, "\\/:*?\"<>|\0");
+
+            filename+=".zip";
+
+
+            std::filesystem::path temp_path="./temp_save_folder";
+
+            createFolder(temp_path);
+            saveEverything(temp_path);
+            zipFolder(temp_path, (dest / filename));
+            removeFile(temp_path);
+
+
+            return {STAY_SHOW_MSG, "Zip successfully saved"};
     }});
 
-    menu_load_data.addItem({"Load EVERYTGING!!!", [this]()->MenuReturn {
-            const std::string loc = "C:\\Users\\arman\\Desktop\\Test";
-            this->animalDB.readFromCSVFile("animaldb", loc);
-            this->enclosureDB.readFromCSVFile("enclosuredb", loc);
-            this->keeperDB.readFromCSVFile("keeperdb", loc);
-            this->speciesDB.readFromCSVFile("speciesdb", loc);
-            this->regionDB.readFromCSVFile("regiondb", loc);
-            return {STAY_SHOW_MSG, ":)"};
+    menu_save_data.addItem({"Save to folder", [this]()->MenuReturn {
+
+            auto dest=getPathFromUser("Where to save?", true);
+
+            ensureFolderExists(dest);
+
+            if (saveEverything(dest)) {
+                return {STAY_SHOW_MSG, "Files saved"};
+            }else {
+                return {STAY_SHOW_ERROR, "Something went wrong"};
+            }
     }});
+
+    menu_save_data.addItem({"Save specific table", [this]()->MenuReturn {
+
+        auto table_choice=getOptionFromUser(
+            std::array<const char*, 5> {{"Animals", "Enclosures", "Keepers", "Species", "Regions"}},
+            "Pick the table?"
+            );;
+
+        auto dest=getPathFromUser("Where to save?");
+        auto filename=getStringFromUser("Input file name", true, "\\/:*?\"<>|\0");
+
+        bool saved;
+        switch (table_choice) {
+            case 0:
+                saved=this->animalDB.saveToCSVFile(filename, dest.string());
+                break;
+            case 1:
+                saved=this->enclosureDB.saveToCSVFile(filename, dest.string());
+                break;
+            case 2:
+                saved=this->keeperDB.saveToCSVFile(filename, dest.string());
+                break;
+            case 3:
+                saved=this->speciesDB.saveToCSVFile(filename, dest.string());
+                break;
+            case 4:
+                saved=this->speciesDB.saveToCSVFile(filename, dest.string());
+                break;
+            default:
+                saved=false;
+        }
+
+        if (saved) {
+            return {STAY_SHOW_MSG, "Table saved"};
+        }else {
+            return {STAY_SHOW_ERROR, "Failed to save to CSV file"};
+        }
+
+    }});
+
+    menu_load_data.addItem({"Load from folder", [this]()->MenuReturn {
+
+            clearConsole();
+            std::cout << "If you don't clear data there's extremely small chance of conflicting IDs\nDo you want to clear data?";
+
+            bool clear_data = getConfirmationFromUser(">");
+            auto dest=getPathFromUser("Input folder path");
+
+            if (loadEverything(dest, clear_data)) {
+                return {STAY_SHOW_MSG, "Table loaded"};
+            }else {
+                return {STAY_SHOW_ERROR, "Failed to load properly"};
+            }
+
+
+
+    }});
+
+    menu_load_data.addItem({"Load from zip", [this]()->MenuReturn {
+
+        clearConsole();
+        std::cout << "If you don't clear data there's extremely small chance of conflicting IDs\nDo you want to clear data?";
+
+        bool clear_data = getConfirmationFromUser(">");
+        auto dest=getPathFromUser("Input folder path");
+        auto filename=getStringFromUser("Input file name", true, "\\/:*?\"<>|\0");
+
+        if (!checkIfFileExists(dest/ filename)) {
+            return {STAY_SHOW_ERROR, "File doesn't exist"};
+        };
+
+        std::filesystem::path temp_path="./temp_save_folder";
+
+        createFolder(temp_path);
+
+        unzipFile(dest/filename, temp_path);
+
+        loadEverything(temp_path/"temp_save_folder", clear_data);
+        removeFile(temp_path);
+
+        return {STAY_SHOW_MSG, "Zip successfully saved"};
+
+    }});
+
+    menu_load_data.addItem({"Load specific table", [this]()->MenuReturn {
+
+        auto dest=getPathFromUser("Input folder path");
+        auto filename=getStringFromUser("Input file name", true, "\\/:*?\"<>|\0");
+
+        if (!checkIfFileExists(dest/ filename)) {
+            return {STAY_SHOW_ERROR, "File doesn't exist"};
+        };
+
+        auto table_choice=getOptionFromUser(
+        std::array<const char*, 5> {{"Animals", "Enclosures", "Keepers", "Species", "Regions"}},
+        "Pick the table?"
+        );;
+
+        bool loaded;
+        switch (table_choice) {
+            case 0:
+                loaded=this->animalDB.readFromCSVFile(filename, dest.string());
+                break;
+            case 1:
+                loaded=this->enclosureDB.readFromCSVFile(filename, dest.string());
+                break;
+            case 2:
+                loaded=this->keeperDB.readFromCSVFile(filename, dest.string());
+                break;
+            case 3:
+                loaded=this->speciesDB.readFromCSVFile(filename, dest.string());
+                break;
+            case 4:
+                loaded=this->speciesDB.readFromCSVFile(filename, dest.string());
+                break;
+            default:
+                loaded=false;
+        }
+
+        if (loaded) {
+            return {STAY_SHOW_MSG, "Table successfully loaded"};
+        }else {
+            return {STAY_SHOW_ERROR, "Failed to load properly"};
+        }
+
+    }});
+
+
+
 
     menu_add_data.addItem({"Add region",    makeAdd(regionDB, "Region")});
     menu_add_data.addItem({"Add species",   makeAdd(speciesDB, "Species")});

@@ -179,7 +179,10 @@ bool validateString(const std::string &string, const std::string &unallowed_char
 std::string getStringFromUser(const std::string &question, bool with_confirmation, std::string unallowed_chars) {
 
     std::string input;
-    bool confirmed, valid = false;
+    bool confirmed, valid;
+    confirmed=false;
+    valid=false;
+
     bool needs_validation = !unallowed_chars.empty();
 
     if (!needs_validation) {

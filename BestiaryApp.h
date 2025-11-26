@@ -45,6 +45,9 @@ class BestiaryApp {
         bool Run();
 
         static void Splashscreen();
+
+        bool saveEverything(std::filesystem::path folder);
+        bool loadEverything(std::filesystem::path folder, bool clear_data);
 };
 
 #endif //BESTIARYCPP_BESTIARYAPP_H

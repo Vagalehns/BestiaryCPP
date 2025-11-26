@@ -10,8 +10,6 @@ add_executable(BestiaryCPP main.cpp
         styling_functions.h
         BestiaryApp.cpp
         BestiaryApp.h
-        formFunctions.cpp
-        formFunctions.h
         data_storing/genericDataBase.h
         data_storing/databases/Region.h
         data_storing/dbParameters.h
@@ -22,4 +20,6 @@ add_executable(BestiaryCPP main.cpp
         data_storing/databases/Keeper.h
         data_storing/databases/Enclosure.h
         data_storing/databases/Animal.h
+        file_functions.cpp
+        file_functions.h
 )
