@@ -20,6 +20,7 @@ struct Enclosure : DefaultStruct {
     void display() {
         std::cout << "\n Name: " << name;
         std::cout << "\n Section: " << section;
+        std::cout << "\n Type: " << EnclosuresTypes[type];
     };
 
     Enclosure(){};
@@ -37,8 +38,10 @@ public:
 
         bool inputForm(Enclosure &new_object) override {
 
-                new_object.name=getStringFromUser("Write name you want to add", true);
-                new_object.section=getStringFromUser("Write section you want to add", true);
+                new_object.name=getStringFromUser("Write name of enclosure you want to add", true);
+                clearConsole();
+                new_object.section=getStringFromUser("Write of section you want to add", true);
+                clearConsole();
                 new_object.type=  getOptionFromUser(EnclosuresTypes, "Pick enclosure type!");
                 return true;
         };

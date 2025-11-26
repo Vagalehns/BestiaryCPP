@@ -37,10 +37,19 @@ struct PhoneNumber {
 };
 
 struct Address {
-    std::string address;
+    std::string street;
+    std::string city;
+    std::string zip_code;
 
     Address(){};
-    Address(std::string address) : address(address) {};
+    Address( std::string city, std::string street, std::string zip_code) :
+            city(std::move(city)), street(std::move(street)), zip_code(std::move(zip_code)) {};
+
+    std::string toString() {
+        std::stringstream ss;
+        ss << city << "," << street << "," << zip_code;
+        return ss.str();
+    }
 };
 
 struct Keeper : DefaultStruct {
@@ -53,7 +62,7 @@ struct Keeper : DefaultStruct {
     void display() {
         std::cout << "\n Name: " << name << " " << surname;
         std::cout << "\n Phone: " << phone_number.number;
-        std::cout << "\n Address: " << address.address;
+        std::cout << "\n Address: " << address.city << ", " << address.street << ", " << address.zip_code;
     };
 
     Keeper(){};
@@ -73,10 +82,15 @@ public:
         bool inputForm(Keeper &new_object) override {
 
                 new_object.name=getStringFromUser("Write name you want to add", true);
+                clearConsole();
                 new_object.surname=getStringFromUser("Write surname you want to add", true);
+                clearConsole();
                 new_object.phone_number=getStringFromUserWithPattern("Input phone number", PhoneNumber::Error_Message, PhoneNumber::checkPhoneNumber);
-                new_object.address=getStringFromUser("Write address you want to add", true);
-
+                clearConsole();
+                std::cout << "Enter address:\n";
+                new_object.address.city=getStringFromUser("Write city", true);
+                new_object.address.street=getStringFromUser("Write street and number", true);
+                new_object.address.zip_code=getStringFromUser("Write zip code", true);
                 return true;
         };
 
@@ -92,20 +106,26 @@ public:
                 t.addItem(r.name);
                 t.addItem(r.surname);
                 t.addItem(r.phone_number.number);
-                t.addItem(r.address.address);
+                t.addItem(r.address.toString());
             };
         };
 
         std::string convertToCSVLine(int index) override {
             std::stringstream ss;
             auto di=data[index];
-            ss<<di.ID<<CSV_SEP<<di.name<<CSV_SEP<<di.surname<<CSV_SEP<<di.address.address<<CSV_SEP<<di.phone_number.number;
+            ss<<di.ID<<CSV_SEP<<di.name<<CSV_SEP<<di.surname << CSV_SEP
+            << di.address.city << CSV_SEP << di.address.street << CSV_SEP << di.address.zip_code
+            <<CSV_SEP<<di.phone_number.number;
             return ss.str();
         };
 
         std::string getCSVHeader() override {
             std::stringstream ss;
-            ss << "ID" << CSV_SEP << "Name" << CSV_SEP << "Surname" << CSV_SEP << "Address" << CSV_SEP << "Phone number";
+            ss  << "ID" << CSV_SEP
+                << "Name" << CSV_SEP
+                << "Surname" << CSV_SEP
+                << "Address.city" << CSV_SEP << "Address.street" << CSV_SEP << "Address.zipcode" << CSV_SEP
+                << "Phone number";
             return ss.str();
         };
 
@@ -124,7 +144,11 @@ public:
             new_keeper.surname = temp;
 
             std::getline(ss, temp, CSV_SEP);
-            new_keeper.address= temp;
+            new_keeper.address.city= temp;
+            std::getline(ss, temp, CSV_SEP);
+            new_keeper.address.street= temp;
+            std::getline(ss, temp, CSV_SEP);
+            new_keeper.address.zip_code= temp;
 
             std::getline(ss, temp, CSV_SEP);
             new_keeper.phone_number= temp;

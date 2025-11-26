@@ -16,19 +16,6 @@
 
 #define MAX_PAGE_SIZE 14
 
-// Gemini 2.5
-inline size_t utf8_code_point_count(const std::string& s) {
-
-    size_t count = 0;
-    for (char c : s) {
-
-        // UTF-8 lead bytes (bytes that start a new code point)
-        if ((c & 0xC0) != 0x80) {
-            count++;
-        }
-    }
-    return count;
-}
 
 
 struct TableV2Column {
@@ -147,7 +134,7 @@ public:
 
         items.push_back(value);
 
-        size_t value_size = utf8_code_point_count(value);
+        size_t value_size = getProperStringLength(value);
 
         if (value_size>columns[cur_col].width) {
 

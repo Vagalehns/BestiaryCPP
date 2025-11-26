@@ -61,10 +61,10 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_save_data.addItem({"Save EVERYTGING!!!", [this]()->MenuReturn {
             const std::string loc = "C:\\Users\\arman\\Desktop\\Test";
             this->animalDB.saveToCSVFile("animaldb", loc);
-            this->enclosureDB.saveToCSVFile("enclosuredb", loc);
+            // this->enclosureDB.saveToCSVFile("enclosuredb", loc);
             this->keeperDB.saveToCSVFile("keeperdb", loc);
-            this->regionDB.saveToCSVFile("regiondb", loc);
-            this->speciesDB.saveToCSVFile("speciesdb", loc);
+            // this->regionDB.saveToCSVFile("regiondb", loc);
+            // this->speciesDB.saveToCSVFile("speciesdb", loc);
             return {STAY_SHOW_MSG, ":)"};
     }});
 

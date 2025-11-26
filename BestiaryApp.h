@@ -16,11 +16,11 @@
 
 inline bool echo(const std::string &str );
 
-typedef struct{
+struct AppState{
     bool nofuzz=false;
     bool vocal=false;
     bool help=false;
-} AppState ;
+};
 
 class BestiaryApp {
 

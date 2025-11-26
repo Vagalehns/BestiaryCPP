@@ -17,7 +17,7 @@ void clearConsole();
 
 std::string generateTable(std::vector<std::string> data, int columns, bool borders=false);
 
-int getIntFromUser(int min, int max, const std::string &question, bool has_upper_bound, bool has_lower_bound);
+long long int  getIntFromUser(long long int  min, long long int  max, const std::string &question, bool has_upper_bound, bool has_lower_bound);
 bool getConfirmationFromUser(const std::string &question);
 
 bool checkForChar(const std::string &string, char c);
@@ -25,9 +25,13 @@ bool validateString(const std::string &string, const std::string &unallowed_char
 std::string padString(std::string string_to_pad, unsigned short new_size, char pad_char, bool center);
 
 
+size_t getProperStringLength(const std::string &string);
 std::string getStringFromUser(const std::string &question, bool with_confirmation, std::string unallowed_chars);
 std::string getStringFromUser(const std::string &question, bool with_confirmation);
 std::string getStringFromUserWithPattern(const std::string &question, std::string error_message, std::function<bool(std::string)> checkFunc);
+
+std::time_t getTimeFromUser(const std::string &question, std::string format);
+std::time_t getTimeFromUser(const std::string &question);
 
 void resetListItem();
 void printListItem(std::string item, bool reset);
@@ -57,6 +61,10 @@ int getOptionFromUser(const std::array<const char*, N>& options, std::string que
 
     return result;
 }
+
+std::string formatTime(std::time_t t, const std::string &format);
+std::string formatTime(std::time_t t);
+
 
 
 

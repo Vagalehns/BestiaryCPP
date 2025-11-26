@@ -25,4 +25,6 @@
                      "It's currently empty\n"\
                      "But not for long\n"\
 
+#define DEFAULT_TIME_FORMAT "%Y-%m-%d"
+
 #endif //BESTIARYCPP_INFO_H

@@ -14,19 +14,101 @@
 #include "../tableV2.h"
 #include "../../TUI_functions.h"
 
-std::string inline formatTime(std::time_t t) {
-    std::tm* tm = std::localtime(&t);
-    std::ostringstream oss;
-    oss << std::put_time(tm, "%Y-%m-%d %H:%M");
-    return oss.str();
-}
+struct Weight {
 
+    unsigned long int weight_in_milligrams;
+    WeightMeasurement preferred_measurement;
+
+    static std::string getPrefix(WeightMeasurement measurement) {
+        return WeightMeasurementPrefix[measurement];
+    }
+
+    static std::string getFullName(WeightMeasurement measurement) {
+        return WeightMeasurementFullName[measurement];
+    }
+
+    Weight(){};
+
+    Weight(unsigned long int value, WeightMeasurement measurement)
+        : preferred_measurement(measurement) {
+        setWeight(value, measurement);
+    }
+
+    // Gemini 2.5
+    void setWeight(unsigned long int value, WeightMeasurement measurement) {
+        switch (measurement) {
+            case Kilogram:
+                // 1 Kg = 1,000,000 mg
+                this->weight_in_milligrams = value * 1000000UL;
+                break;
+            case Gram:
+                // 1 g = 1,000 mg
+                this->weight_in_milligrams = value * 1000UL;
+                break;
+            case Milligram:
+                // 1 mg = 1 mg
+                this->weight_in_milligrams = value;
+                break;
+            case Pound:
+                // 1 lb approx 453,592 mg
+                this->weight_in_milligrams = value * 453592UL;
+                break;
+            case Ton:
+                // 1 Ton = 1,000,000,000 mg
+                this->weight_in_milligrams = value * 1000000000UL;
+                break;
+            case Ounce:
+                // 1 Oz approx 28,350 mg (using integer approximation)
+                this->weight_in_milligrams = value * 28350UL;
+                break;
+            default:
+                this->weight_in_milligrams = 0;
+                break;
+        }
+    }
+
+    std::string display() const {
+        double display_value = 0.0;
+        const double mg_value = weight_in_milligrams;
+
+        switch (preferred_measurement) {
+            case Kilogram:
+                display_value = mg_value / 1000000.0;
+                break;
+            case Gram:
+                display_value = mg_value / 1000.0;
+                break;
+            case Milligram:
+                display_value = mg_value;
+                break;
+            case Pound:
+                display_value = mg_value / 453592.0;
+                break;
+            case Ton:
+                display_value = mg_value / 1000000000.0;
+                break;
+            case Ounce:
+                display_value = mg_value / 28350.0;
+                break;
+            default:
+                return "Unknown Measurement";
+        }
+
+        std::string suffix = getPrefix(preferred_measurement);
+        std::stringstream ss;
+
+        ss << std::fixed << std::setprecision(2) << display_value << suffix;
+
+        return ss.str();
+    }
+};
 
 struct Animal : DefaultStruct {
 
     std::string name;
 
-    unsigned long int weight_in_grams;
+    Weight weight;
+
     bool sex;
 
     std::time_t date_of_birth;
@@ -40,7 +122,7 @@ struct Animal : DefaultStruct {
     Animal(){};
 
     Animal(std::string name,
-       unsigned long int weight_in_grams,
+       Weight weight,
        bool sex,
        std::time_t date_of_birth,
        std::time_t last_veterinary_check,
@@ -49,7 +131,7 @@ struct Animal : DefaultStruct {
        ExternalKey<Keeper> keeper_key,
        ExternalKey<Enclosure> enclosure_key)
         : name(std::move(name)),
-          weight_in_grams(weight_in_grams),
+          weight(weight),
           sex(sex),
           date_of_birth(date_of_birth),
           last_veterinary_check(last_veterinary_check),
@@ -61,7 +143,7 @@ struct Animal : DefaultStruct {
 
     void display() {
         std::cout << "\nName : " << name;
-        std::cout << "\nWeight: " << weight_in_grams << "g";
+        std::cout << "\nWeight: " << weight.display();
         std::cout << "\nSex: " << (sex ? "Male" : "Female");
 
         std::cout << "\nDOB: " << formatTime(date_of_birth);
@@ -71,9 +153,9 @@ struct Animal : DefaultStruct {
 
         const Species* s_ptr = species.get();
         if (s_ptr != nullptr) {
-            std::cout << "Species: " << s_ptr->name << "\n";
+            std::cout << "\nSpecies: " << s_ptr->name << "\n";
         } else {
-            std::cout << "Species: [Unassigned]\n";
+            std::cout << "\nSpecies: [Unassigned]\n";
         }
 
         const Keeper* k_ptr = keeper.get();
@@ -127,12 +209,19 @@ public:
     bool inputForm(Animal &new_object) override {
 
         new_object.name=getStringFromUser("Write name you want to add", true);
-        new_object.date_of_birth = 50000;
-        new_object.last_veterinary_check = 50000;
-        new_object.date_of_weighting = 50000;
+
+        clearConsole();
+        new_object.date_of_birth = getTimeFromUser("Write DOB");
+        clearConsole();
+        new_object.last_veterinary_check = getTimeFromUser("Write Last vet check");
+        clearConsole();
+        new_object.date_of_weighting = getTimeFromUser("Write Last date of weighing");;
 
         new_object.sex=true;
-        new_object.weight_in_grams=10000;
+
+
+        WeightMeasurement wm = static_cast<WeightMeasurement>(getOptionFromUser(WeightMeasurementFullName, "Pick measurement type!"));
+        new_object.weight=Weight(getIntFromUser(0, -1, "Input weight:", false, true ), wm);
 
         bool success;
 
@@ -180,7 +269,7 @@ public:
             }
 
             t.addItem(formatTime(r.date_of_birth));
-            t.addItem(r.weight_in_grams);
+            t.addItem(r.weight.display());
             t.addItem(formatTime(r.last_veterinary_check));
 
         };
@@ -193,7 +282,8 @@ public:
 
         ss << di.ID << CSV_SEP;
         ss << di.name << CSV_SEP;
-        ss << di.weight_in_grams << CSV_SEP;
+        ss << di.weight.weight_in_milligrams << CSV_SEP;
+        ss << di.weight.preferred_measurement << CSV_SEP;
         ss << di.sex << CSV_SEP;
         ss << di.date_of_birth << CSV_SEP;
         ss << di.last_veterinary_check << CSV_SEP;
@@ -207,7 +297,7 @@ public:
 
     std::string getCSVHeader() override {
         std::stringstream ss;
-        ss << "ID" << CSV_SEP << "Name" << CSV_SEP << "Weight g" << CSV_SEP << "Sex" << CSV_SEP
+        ss << "ID" << CSV_SEP << "Name" << CSV_SEP << "Weight"  << CSV_SEP << "Weight.preferred_measurements" << CSV_SEP << "Sex" << CSV_SEP
            << "Date of Birth" << CSV_SEP << "Last Vet Check" << CSV_SEP << "Date of Weighting" << CSV_SEP
            << "SpeciesID" << CSV_SEP << "KeeperID" << CSV_SEP << "EnclosureID";
         return ss.str();
@@ -226,7 +316,10 @@ public:
         new_animal.name = temp;
 
         std::getline(ss, temp, CSV_SEP);
-        new_animal.weight_in_grams = std::stoi(temp);
+        new_animal.weight.weight_in_milligrams = std::stoul(temp);
+
+        std::getline(ss, temp, CSV_SEP);
+        new_animal.weight.preferred_measurement = static_cast<WeightMeasurement>(std::stoi(temp));
 
         std::getline(ss, temp, CSV_SEP);
         new_animal.sex= (bool) std::stoi(temp);

@@ -2,6 +2,8 @@
 // Created by arman on 11/21/2025.
 //
 
+#include <array>
+
 #ifndef BESTIARYCPP_TABLESPARAMETERS_H
 #define BESTIARYCPP_TABLESPARAMETERS_H
 
@@ -70,5 +72,36 @@ constexpr std::array<const char*, 2> EnclosuresTypes = {
     "Aquarium",
     "Cage"
 };
+
+enum WeightMeasurement {
+    _First = 0,
+    Kilogram,
+    Gram,
+    Milligram,
+    Pound,
+    Ton,
+    Ounce,
+    _Last = Ounce
+};
+
+constexpr std::array<const char*, 6> WeightMeasurementPrefix = {
+    "kg",
+    "g",
+    "mg",
+    "lb",
+    "t",
+    "oz"
+};
+
+constexpr std::array<const char*, 6> WeightMeasurementFullName = {
+    "Kilogram",
+    "Gram",
+    "Milligram",
+    "Pound",
+    "Ton",
+    "Ounce",
+};
+
+
 
 #endif //BESTIARYCPP_TABLESPARAMETERS_H

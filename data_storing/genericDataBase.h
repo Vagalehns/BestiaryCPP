@@ -294,8 +294,10 @@ class DB {
                 }
 
                 clearConsole();
-                std::cout<<"Do you want to add?";
+                std::cout<<"Do you want to add?\n\n";
+
                 new_dt.display();
+                std::cout << "\n\n";
                 confirm = getConfirmationFromUser(">");
 
                 if (!confirm) {
