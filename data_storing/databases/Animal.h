@@ -205,42 +205,63 @@ public:
         this->enclosure_picker = enclosure_picker;
     }
 
-    bool inputForm(Animal &new_object) override {
+    bool inputForm(Animal &new_object, bool edit) override {
 
-        new_object.name=getStringFromUser("Write name you want to add", true);
+            if (!edit || getConfirmationFromUser("Do you want to edit name?")){
+                new_object.name=getStringFromUser("Write name you want to add", true);
+            }
+            clearConsole();
 
-        clearConsole();
-        new_object.date_of_birth = getTimeFromUser("Write DOB");
-        clearConsole();
-        new_object.last_veterinary_check = getTimeFromUser("Write Last vet check");
-        clearConsole();
-        new_object.date_of_weighting = getTimeFromUser("Write Last date of weighing");;
+            if (!edit || getConfirmationFromUser("Do you want to edit DOB?")) {
+                new_object.date_of_birth = getTimeFromUser("Write DOB");
+            }
+            clearConsole();
 
-        new_object.sex=true;
+            if (!edit || getConfirmationFromUser("Do you want to edit Last vet check date?")) {
+                new_object.last_veterinary_check = getTimeFromUser("Write Last vet check");
+            }
+            clearConsole();
+
+            if (!edit || getConfirmationFromUser("Do you want to edit Last date of weighing?")) {
+                new_object.date_of_weighting = getTimeFromUser("Write Last date of weighing");
+            }
+
+            if (!edit || getConfirmationFromUser("Do you want to edit sex?")) {
+                new_object.sex = getConfirmationFromUser("Is the animal male?");
+            }
+            clearConsole();
+
+            if (!edit || getConfirmationFromUser("Do you want to edit weight?")) {
+                WeightMeasurement wm = static_cast<WeightMeasurement>(getOptionFromUser(WeightMeasurementFullName, "Pick measurement type!"));
+                new_object.weight=Weight(getIntFromUser(0, -1, "Input weight:", false, true ), wm);
+            }
+
+            bool success;
+
+            if (!edit || getConfirmationFromUser("Do you want to edit species?")) {
+                new_object.species=ExternalKey(species_picker(success), species_resolver);
+                if (!success) return false;
+            }
+
+            if (!edit || getConfirmationFromUser("Do you want to edit keeper?")) {
+                new_object.keeper=ExternalKey(keeper_picker(success), keeper_resolver);
+                if (!success) return false;
+            }
+
+            if (!edit || getConfirmationFromUser("Do you want to edit enclosure?")) {
+                new_object.enclosure=ExternalKey(enclosure_picker(success), enclosure_resolver);
+                if (!success) return false;
+            }
+
+            return true;
+        };
 
 
-        WeightMeasurement wm = static_cast<WeightMeasurement>(getOptionFromUser(WeightMeasurementFullName, "Pick measurement type!"));
-        new_object.weight=Weight(getIntFromUser(0, -1, "Input weight:", false, true ), wm);
-
-        bool success;
-
-        new_object.species=ExternalKey(species_picker(success), species_resolver);
-        if (!success) return false;
-
-        new_object.keeper=ExternalKey(keeper_picker(success), keeper_resolver);
-        if (!success) return false;
-
-        new_object.enclosure=ExternalKey(enclosure_picker(success), enclosure_resolver);
-        if (!success) return false;
-
-        return true;
-    };
-
-    std::vector< std::pair< std::string, char > > getBaseViewColums() override {
+    std::vector< std::pair< std::string, char > > getViewColums(char view) override {
         return {{"ID", 'i'}, {"Name", 's'}, {"Sex", 's'}, {"Species", 's'}, {"Keeper", 's'}, {"Enclosure", 's'}, {"DOB", 's'}, {"Weight", 'i'}, {"Last veterinary check", 's'} };
     };
 
-    std::vector<std::string> getAsStrings(Animal &ref) override {
+    std::vector<std::string> getAsStrings(Animal &ref, char view) override {
         std::vector<std::string> result;
 
         result.push_back(std::to_string(ref.ID));

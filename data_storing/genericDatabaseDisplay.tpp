@@ -34,12 +34,12 @@ struct TableStyle {
 
 
 template<typename DT, unsigned int MaxData>
-std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(TableStyle ts) {
+std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(TableStyle ts, char view) {
 
     std::vector<std::string> pages_rendered;
     std::string header;
 
-    auto columns = getBaseViewColums();
+    auto columns = this->getViewColums(view);
     std::vector<unsigned int> column_widths(columns.size());
 
     for (int i = 0; i < columns.size(); i++) {
@@ -47,7 +47,7 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
     }
 
     for (int i=0; i<counter; i++) {
-        auto field_data = getAsStrings(data[i]);
+        auto field_data = this->getAsStrings(data[i], view);
 
         for (int j=0; j<columns.size(); j++) {
 
@@ -116,7 +116,7 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
 
 
         if (ts.is_numbered) {
-            cur_page << padString(std::to_string(i+1)+".", left_space_width, ts.padding_symb, true) ;
+            cur_page << padString(std::to_string(i+1)+")", left_space_width, ts.padding_symb, true) ;
         }else {
             cur_page << empty_left_space;
         }
@@ -125,7 +125,7 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
 
 
 
-        auto field_data = getAsStrings(data[i]);
+        auto field_data = getAsStrings(data[i], view);
 
         for (int j=0; j<columns.size(); j++) {
 
@@ -189,14 +189,23 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
 };
 
 
-
-
 template<typename DT, unsigned int MaxData>
-void DB<DT, MaxData>::baseView() {
-    auto [page_renders, header_render] = this->renderTable(TableStyle());
+KeyID DB<DT, MaxData>::display(char view, bool picker) {
+
+    auto ts = TableStyle();
+
+    if (picker) {
+        ts.outer_border_ver_symb = '?';
+        ts.outer_border_hor_symb = '?';
+        ts.is_numbered = true;
+    }
+
+
+    auto [page_renders, header_render] = this->renderTable(ts, view);
 
     int cur_page=1;
     bool show_table = true;
+    KeyID id_picked = 0;
 
 
     do {
@@ -209,7 +218,12 @@ void DB<DT, MaxData>::baseView() {
         std::cout << GREENSTY BOLDSTY "\nPage " << cur_page << " from " << page_renders.size() << ENDSTY;
         std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2" ;
 
-        std::cout << " (exit)";
+        if (picker) {
+            std::cout << " (pick)";
+        }else {
+            std::cout << " (exit)";
+        }
+
         std::cout << "\n";
 
 
@@ -224,9 +238,19 @@ void DB<DT, MaxData>::baseView() {
                 if (cur_page!=1) cur_page-=1;
                 break;
             case -2:
-                if (getConfirmationFromUser("Do you want to close the table?")) {
+
+                if (picker) {
+                    std::cout << "Pick the item:\n";
+                    id_picked=getIntFromUser(1, this->countFiltered(), ">", true, true);
+                    id_picked=this->getByFilteredIndex(id_picked-1);
                     show_table=false;
+                }else {
+                    if (getConfirmationFromUser("Do you want to close the table?")) {
+                        show_table=false;
+                    }
                 }
+
+
 
                 break;
             default:
@@ -235,5 +259,7 @@ void DB<DT, MaxData>::baseView() {
         }
 
     } while (show_table);
+
+    return id_picked;
 }
 

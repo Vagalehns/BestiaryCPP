@@ -32,7 +32,8 @@ class BestiaryApp {
              menu_add_data,
              menu_view_data,
              menu_load_data,
-             menu_save_data;
+             menu_save_data,
+             menu_edit_data;
 
         AppState State;
 

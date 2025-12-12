@@ -13,8 +13,55 @@ KeyID DB<DT, MaxData>::pickByUser(bool &successful) {
 
     successful = true;
 
-    KeyID id_picked=0;
+    KeyID id_picked= display(0, true);
     return data[id_picked].ID;
+};
+
+
+template<typename DT, unsigned int MaxData>
+bool DB<DT, MaxData>::editByForm() {
+    if (isEmpty()) {
+        return false;
+    }
+
+    unsigned int data_to_edit_index = display(0, true);
+
+    auto &data_to_edit = data[data_to_edit_index];
+
+    bool confirm = false;
+    bool impossible = false;
+
+    do {
+        clearConsole();
+
+        bool form_success = inputForm(data_to_edit, true);
+
+        if (!form_success) {
+            impossible=true;
+            continue;
+        }
+
+        clearConsole();
+        std::cout<<"Confirm edit?\n\n";
+
+        data_to_edit.display();
+        std::cout << "\n\n";
+        confirm = getConfirmationFromUser(">");
+
+        if (!confirm) {
+            std::cout<<"Do you want to cancel?";
+            if (getConfirmationFromUser(">")) {
+                return false;
+            }
+        }
+
+    } while (!confirm && !impossible);
+
+    if (impossible) {
+        return false;
+    }
+
+    return true;
 };
 
 
@@ -33,7 +80,7 @@ bool DB<DT, MaxData>::addByForm() {
     do {
         clearConsole();
 
-        bool form_success = inputForm(new_dt);
+        bool form_success = inputForm(new_dt, false);
 
         if (!form_success) {
             impossible=true;
@@ -167,6 +214,45 @@ void DB<DT, MaxData>::resetFilter() {
         data[i].filtered_out = false;
     }
 }
+
+template<typename DT, unsigned int MaxData>
+unsigned int DB<DT, MaxData>::countFiltered() {
+
+    unsigned int count = 0;
+
+    for (int i=0; i<counter; i++) {
+        if (data[i].filtered_out==false) count++;
+    }
+
+    return count;
+};
+
+
+template<typename DT, unsigned int MaxData>
+unsigned int DB<DT, MaxData>::getByFilteredIndex(unsigned int filtered_index) {
+
+
+    unsigned int correct_index = 0;
+    unsigned int filtered_counter = 0;
+
+    for (int i=0; i<counter; i++) {
+        if (data[i].filtered_out==false) {
+
+
+            if (filtered_counter == filtered_index) {
+                correct_index = i;
+                break;
+            }
+
+            filtered_counter++;
+
+
+        }
+    }
+
+    return correct_index;
+};
+
 
 
 template<typename DT, unsigned int MaxData>

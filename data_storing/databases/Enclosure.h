@@ -35,22 +35,30 @@ struct Enclosure : DefaultStruct {
 class EnclosureDB : public DB<Enclosure, MAX_ENCLOSURE> {
 public:
 
-        bool inputForm(Enclosure &new_object) override {
+    bool inputForm(Enclosure &new_object, bool edit) override {
 
-                new_object.name=getStringFromUser("Write name of enclosure you want to add", true);
-                clearConsole();
-                new_object.section=getStringFromUser("Write of section you want to add", true);
-                clearConsole();
-                new_object.type=  getOptionFromUser(EnclosuresTypes, "Pick enclosure type!");
-                return true;
-        };
+        if (!edit || getConfirmationFromUser("Do you want to edit name?")) {
+            new_object.name=getStringFromUser("Write name of enclosure you want to add", true);
+        }
+        clearConsole();
+
+        if (!edit || getConfirmationFromUser("Do you want to edit section?")) {
+            new_object.section=getStringFromUser("Write of section you want to add", true);
+        }
+        clearConsole();
+
+        if (!edit || getConfirmationFromUser("Do you want to edit type?")) {
+            new_object.type=  getOptionFromUser(EnclosuresTypes, "Pick enclosure type!");
+        }
+        return true;
+    };
 
 
-        std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
+        std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"Section", 's'}, {"Type", 's'}};
             };
 
-        std::vector<std::string> getAsStrings(Enclosure &ref) override {
+        std::vector<std::string> getAsStrings(Enclosure &ref, char view) override {
             std::vector<std::string> result;
             result.push_back(std::to_string(ref.ID));
             result.push_back(ref.name);

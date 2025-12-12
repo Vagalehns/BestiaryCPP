@@ -99,22 +99,26 @@ public:
         }
     }
 
-        bool inputForm(Region &new_object) override {
+    bool inputForm(Region &new_object, bool edit) override {
 
-                new_object.name=getStringFromUser("Write region name you want to add", true);
+        if (!edit || getConfirmationFromUser("Do you want to edit region name?")) {
+            new_object.name=getStringFromUser("Write region name you want to add", true);
+        }
 
-                new_object.first_level_region= (FirstLevelRegion) getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!");
+        if (!edit || getConfirmationFromUser("Do you want to edit first level region?")) {
+            new_object.first_level_region= (FirstLevelRegion) getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!");
+        }
 
-                return true;
-        };
+        return true;
+    };
 
 
-        std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
+        std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}};
             };
 
 
-        std::vector<std::string> getAsStrings(Region &ref) override {
+        std::vector<std::string> getAsStrings(Region &ref, char view) override {
             std::vector<std::string> result;
             result.push_back(std::to_string(ref.ID));
             result.push_back(ref.name);

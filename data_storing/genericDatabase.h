@@ -90,6 +90,9 @@ class DB {
 
         template <typename T, typename Pred>
         void filterByField(T DT::* memberPtr, Pred pred);
+        void resetFilter();
+        unsigned int countFiltered();
+        unsigned int getByFilteredIndex( unsigned int filtered_index);
 
         DT* getByID(KeyID ID);
         bool removeAtIndex(unsigned int index);
@@ -99,28 +102,29 @@ class DB {
         bool isFull();
         bool isEmpty();
         bool append(DT new_data);
-        void resetFilter();
+
 
 
         void clearData();
 
         bool addByForm();
+        bool editByForm();
         KeyID pickByUser(bool &successful);
 
 
 
 
         // Display operations
-        virtual std::vector<std::pair< std::string, char>> getBaseViewColums() =0;
-        virtual std::vector<std::string> getAsStrings(DT &ref)=0;
+        virtual std::vector<std::pair< std::string, char>> getViewColums(char view) =0;
+        virtual std::vector<std::string> getAsStrings(DT &ref, char view)=0;
 
-        void baseView();
-        std::pair<std::vector<std::string>, std::string> renderTable(TableStyle table_style);
-
-
+        KeyID display(char view = 0, bool picker = false);
+        std::pair<std::vector<std::string>, std::string> renderTable(TableStyle table_style, char view);
 
 
-        virtual bool inputForm(DT &new_object)=0;
+
+
+        virtual bool inputForm(DT &new_object, bool edit)=0;
 
         // File operations
         virtual std::string convertToCSVLine(int index)=0;

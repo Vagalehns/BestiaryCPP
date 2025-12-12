@@ -78,29 +78,40 @@ struct Keeper : DefaultStruct {
 class KeeperDB : public DB<Keeper, MAX_KEEPERS> {
 public:
 
-        bool inputForm(Keeper &new_object) override {
+    bool inputForm(Keeper &new_object, bool edit) override {
 
-                new_object.name=getStringFromUser("Write name you want to add", true);
-                clearConsole();
-                new_object.surname=getStringFromUser("Write surname you want to add", true);
-                clearConsole();
-                new_object.phone_number=getStringFromUserWithPattern("Input phone number", PhoneNumber::Error_Message, PhoneNumber::checkPhoneNumber);
-                clearConsole();
-                std::cout << "Enter address:\n";
-                new_object.address.city=getStringFromUser("Write city", true);
-                new_object.address.street=getStringFromUser("Write street and number", true);
-                new_object.address.zip_code=getStringFromUser("Write zip code", true);
-                return true;
-        };
+        if (!edit || getConfirmationFromUser("Do you want to edit name?")) {
+            new_object.name=getStringFromUser("Write name you want to add", true);
+        }
+        clearConsole();
+
+        if (!edit || getConfirmationFromUser("Do you want to edit surname?")) {
+            new_object.surname=getStringFromUser("Write surname you want to add", true);
+        }
+        clearConsole();
+
+        if (!edit || getConfirmationFromUser("Do you want to edit phone number?")) {
+            new_object.phone_number=getStringFromUserWithPattern("Input phone number", PhoneNumber::Error_Message, PhoneNumber::checkPhoneNumber);
+        }
+        clearConsole();
+
+        if (!edit || getConfirmationFromUser("Do you want to edit address?")) {
+            std::cout << "Enter address:\n";
+            new_object.address.city=getStringFromUser("Write city", true);
+            new_object.address.street=getStringFromUser("Write street and number", true);
+            new_object.address.zip_code=getStringFromUser("Write zip code", true);
+        }
+        return true;
+    };
 
 
 
-        std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
+        std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"Surname", 's'}, {"Phone number", 's'},  {"Address", 's'}};
             };
 
 
-        std::vector<std::string> getAsStrings(Keeper &ref) override {
+        std::vector<std::string> getAsStrings(Keeper &ref, char view) override {
             std::vector<std::string> result;
             result.push_back(std::to_string(ref.ID));
             result.push_back(ref.name);

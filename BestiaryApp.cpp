@@ -31,9 +31,19 @@ auto makeAdd(DB& db, std::string func_name) {
 }
 
 template<class DB>
+auto makeEdit(DB& db, std::string func_name) {
+    return [&, func_name]() -> MenuReturn {
+        if (db.editByForm())
+            return {STAY_SHOW_MSG, func_name + " edited"};
+        else
+            return {STAY_SHOW_ERROR, "Failed to edit " + func_name};
+    };
+}
+
+template<class DB>
 auto makeView(DB& db) {
     return [&]() -> MenuReturn {
-        db.baseView();
+        db.display();
         return {STAY, ""};
     };
 }
@@ -97,7 +107,8 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_add_data("Add data", "Back"),
     menu_view_data("View data", "Back"),
     menu_load_data("Load data", "Back"),
-    menu_save_data("Save data", "Back"){
+    menu_save_data("Save data", "Back"),
+    menu_edit_data("Edit data", "Back"){
 
 
     State = state;
@@ -271,6 +282,12 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_add_data.addItem({"Add keeper",    makeAdd(keeperDB, "Keeper")});
     menu_add_data.addItem({"Add enclosure", makeAdd(enclosureDB, "Enclosure")});
 
+    menu_edit_data.addItem({"Add region",    makeEdit(regionDB, "Region")});
+    menu_edit_data.addItem({"Add species",   makeEdit(speciesDB, "Species")});
+    menu_edit_data.addItem({"Add animal",    makeEdit(animalDB, "Animal")});
+    menu_edit_data.addItem({"Add keeper",    makeEdit(keeperDB, "Keeper")});
+    menu_edit_data.addItem({"Add enclosure", makeEdit(enclosureDB, "Enclosure")});
+
     menu_view_data.addItem({"View region",    makeView(regionDB)});
     menu_view_data.addItem({"View species",   makeView(speciesDB)});
     menu_view_data.addItem({"View animal",    makeView(animalDB)});
@@ -280,6 +297,7 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_view_data.addItem({"View feeding", []()->MenuReturn{return MenuReturn(STAY);}});
 
     menu_start.addItem({"Add data", [this]()->MenuReturn{return this->menu_add_data.open();}});
+    menu_start.addItem({"Edit data", [this]()->MenuReturn{return this->menu_edit_data.open();}});
     menu_start.addItem({"View data", [this]()->MenuReturn{return this->menu_view_data.open();}});
     menu_start.addItem({"Load data", [this]()->MenuReturn{return this->menu_load_data.open();}});
     menu_start.addItem({"Save data", [this]()->MenuReturn{return this->menu_save_data.open();}});

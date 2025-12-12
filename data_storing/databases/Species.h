@@ -45,28 +45,37 @@ public:
         this->region_picker = region_picker;
     }
 
-    bool inputForm(Species &new_object) override {
+    bool inputForm(Species &new_object, bool edit) override {
 
-        new_object.name=getStringFromUser("Write species name", true);
+        if (!edit || getConfirmationFromUser("Do you want to edit species name?")) {
+            new_object.name=getStringFromUser("Write species name", true);
+        }
         clearConsole();
-        new_object.latin_name=getStringFromUser("Write species latin name", true);
+
+        if (!edit || getConfirmationFromUser("Do you want to edit species latin name?")) {
+            new_object.latin_name=getStringFromUser("Write species latin name", true);
+        }
         clearConsole();
-        new_object.icon=getOptionFromUser(SpeciesEmojiIcons, "Pick species icon");
+
+        if (!edit || getConfirmationFromUser("Do you want to edit species icon?")) {
+            new_object.icon=getOptionFromUser(SpeciesEmojiIcons, "Pick species icon");
+        }
 
         bool success;
-
-        new_object.RegionID=ExternalKey(region_picker(success), region_resolver);
-        if (!success) return false;
+        if (!edit || getConfirmationFromUser("Do you want to edit region?")) {
+            new_object.RegionID=ExternalKey(region_picker(success), region_resolver);
+            if (!success) return false;
+        }
 
         return true;
     };
 
 
-    std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
+    std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
         return {{"ID", 'i'}, {"Name", 's'}, {"Latin name", 's'}, {"Icon", 's'}, {"Region", 's'}};
     };
 
-    std::vector<std::string> getAsStrings(Species &ref) override {
+    std::vector<std::string> getAsStrings(Species &ref, char view) override {
         std::vector<std::string> result;
 
 
