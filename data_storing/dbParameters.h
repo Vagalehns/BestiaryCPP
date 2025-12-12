@@ -102,6 +102,15 @@ constexpr std::array<const char*, 6> WeightMeasurementFullName = {
     "Ounce",
 };
 
+auto static genericStringSort = [](std::string A, std::string B) -> int {
+    return B.compare(A);
+};
+
+auto static genericTimeSort = [](std::time_t A, std::time_t B) -> int {
+    if (A>B) return 1;
+    if (A<B) return -1;
+    return 0;
+};
 
 
 #endif //BESTIARYCPP_TABLESPARAMETERS_H

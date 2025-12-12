@@ -108,12 +108,15 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
     }
 
     std::ostringstream cur_page("");
-    unsigned int per_page_counter = 0;
+    unsigned int per_page_counter = -1;
 
 
 
-    for (int i=0; i<counter; i++, per_page_counter++) {
+    for (int i=0; i<counter; i++) {
 
+        if (data[i].filtered_out) {continue;}
+
+        per_page_counter++;
 
         if (ts.is_numbered) {
             cur_page << padString(std::to_string(i+1)+")", left_space_width, ts.padding_symb, true) ;
@@ -146,6 +149,7 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
 
 
             }
+
 
             cur_page << padString(field_data[j], column_widths[j]+ts.extra_padding, ts.padding_symb, ts.centered);
 
@@ -198,6 +202,9 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
         ts.outer_border_ver_symb = '?';
         ts.outer_border_hor_symb = '?';
         ts.is_numbered = true;
+
+
+        resetFilter();
     }
 
 
@@ -216,7 +223,7 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
         std::cout << page_renders[cur_page-1];
 
         std::cout << GREENSTY BOLDSTY "\nPage " << cur_page << " from " << page_renders.size() << ENDSTY;
-        std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2" ;
+        std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2 (sort), -3 (search/filter), -4 (delete currently selected), -5" ;
 
         if (picker) {
             std::cout << " (pick)";
@@ -227,7 +234,7 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
         std::cout << "\n";
 
 
-        int user_choice=getIntFromUser(-2, page_renders.size(), ">", true, true);
+        int user_choice=getIntFromUser(-5, page_renders.size(), ">", true, true);
 
 
         switch (user_choice) {
@@ -237,7 +244,35 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
             case -1:
                 if (cur_page!=1) cur_page-=1;
                 break;
+
             case -2:
+                this->sortOptions();
+                page_renders= this->renderTable(ts, view).first;
+                break;
+            case -3:
+                this->filterOptions();
+                page_renders= this->renderTable(ts, view).first;
+                break;
+
+            case -4:
+                if (getConfirmationFromUser("Confirm deletion")) {
+                    if (counter==countFiltered()) {
+                        if (getConfirmationFromUser("You have no filters. Do you want to delete everything?")) {
+                            clearData();
+                            show_table=false;
+                        }
+                    }else {
+                        deleteFiltered();
+                        resetFilter();
+                        page_renders= this->renderTable(ts, view).first;
+
+                    }
+                };
+
+                break;
+
+
+            case -5:
 
                 if (picker) {
                     std::cout << "Pick the item:\n";

@@ -216,6 +216,17 @@ void DB<DT, MaxData>::resetFilter() {
 }
 
 template<typename DT, unsigned int MaxData>
+void DB<DT, MaxData>::deleteFiltered() {
+    for (int i=0; i<counter;) {
+        if (data[i].filtered_out==false) {
+            removeAtIndex(i);
+        }else {
+            i++;
+        }
+    }
+}
+
+template<typename DT, unsigned int MaxData>
 unsigned int DB<DT, MaxData>::countFiltered() {
 
     unsigned int count = 0;
@@ -257,7 +268,7 @@ unsigned int DB<DT, MaxData>::getByFilteredIndex(unsigned int filtered_index) {
 
 template<typename DT, unsigned int MaxData>
 template <typename T, typename Pred>
-void DB<DT, MaxData>::order(T DT::* memberPtr, Pred pred) {
+void DB<DT, MaxData>::sort(T DT::* memberPtr, Pred pred) {
 
     //Bubble sort for now
     static_assert(std::is_invocable_r_v<int, Pred, T, T>);

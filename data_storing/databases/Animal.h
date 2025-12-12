@@ -12,6 +12,7 @@
 #include "Species.h"
 #include "../genericDatabase.h"
 #include "../../TUI_functions.h"
+#include "../../TUI_functions/Menu.h"
 
 struct Weight {
 
@@ -255,6 +256,204 @@ public:
 
             return true;
         };
+
+
+    virtual void filterOptions() {
+        Menu sortMenu("Add filter/search", "View");
+
+        sortMenu.addItem({
+            "Search by name",
+            ([this]() -> MenuReturn {
+
+                std::string search_term = getStringFromUser("Please enter search term:", true);
+                bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+                this->filterByField(&Animal::name, [search_term, full_match](std::string name) -> bool {
+                    if (full_match) {
+                        return name == search_term;
+                    }
+
+                    return name.substr(0, search_term.length())==search_term;
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Search by species",
+            ([this]() -> MenuReturn {
+
+                bool success;
+                auto s = species_picker(success);
+
+                if (!success) {
+                    return {STAY_SHOW_ERROR, "Picking the species failed"};
+                }
+
+                this->filterByField(&Animal::species, [s](ExternalKey<Species> species) -> bool {
+                    return species.ID==s;
+                });
+
+                return {STAY, ""};
+            })
+        });
+
+        sortMenu.addItem({
+        "Search by keeper",
+        ([this]() -> MenuReturn {
+
+            bool success;
+            auto k = keeper_picker(success);
+
+            if (!success) {
+                return {STAY_SHOW_ERROR, "Picking the keeper failed"};
+            }
+
+            this->filterByField(&Animal::keeper, [k](ExternalKey<Keeper> keeper) -> bool {
+                return keeper.ID==k;
+            });
+
+            return {STAY, ""};
+        })
+    });
+
+        sortMenu.addItem({
+            "Clear filters",
+            ([this]() -> MenuReturn {
+
+                this->resetFilter();
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.open();
+    }
+
+
+    void sortOptions() override {
+        Menu sortMenu("Pick sort option", "Don't sort");
+
+        sortMenu.addItem({
+            "Sort by name",
+            ([this]() -> MenuReturn {
+                this->sort(&Animal::name, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by weight",
+            ([this]() -> MenuReturn {
+
+                this->sort(&Animal::weight, [](Weight a, Weight b) {
+                    if (a.weight_in_milligrams<b.weight_in_milligrams) return 1;
+                    if (a.weight_in_milligrams>b.weight_in_milligrams) return -1;
+                    return 0;
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by sex",
+            ([this]() -> MenuReturn {
+
+                this->sort(&Animal::sex, [](bool a, bool b) {
+                    if (a==b) return 0;
+                    if (a) return 1;
+                    return -1;
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by DOB",
+            ([this]() -> MenuReturn {
+                this->sort(&Animal::date_of_birth, genericTimeSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by last veterinary check",
+            ([this]() -> MenuReturn {
+                this->sort(&Animal::last_veterinary_check, genericTimeSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by date of weighing",
+            ([this]() -> MenuReturn {
+                this->sort(&Animal::date_of_weighting, genericTimeSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by species",
+            ([this]() -> MenuReturn {
+
+                this->sort(&Animal::species, [](ExternalKey<Species> A, ExternalKey<Species> B) -> int {
+                    auto a = A.get();
+                    auto b = B.get();
+
+                    if (a == nullptr)  return 1;
+
+                    if (b == nullptr) return -1;
+
+                    return b->name.compare(a->name);
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by keeper",
+            ([this]() -> MenuReturn {
+
+                this->sort(&Animal::keeper, [](ExternalKey<Keeper> A, ExternalKey<Keeper> B) -> int {
+                    auto a = A.get();
+                    auto b = B.get();
+
+                    if (a == nullptr)  return 1;
+
+                    if (b == nullptr) return -1;
+
+                    return b->name.compare(a->name);
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by enclosure",
+            ([this]() -> MenuReturn {
+
+                this->sort(&Animal::enclosure, [](ExternalKey<Enclosure> A, ExternalKey<Enclosure> B) -> int {
+                    auto a = A.get();
+                    auto b = B.get();
+
+                    if (a == nullptr)  return 1;
+
+                    if (b == nullptr) return -1;
+
+                    return b->name.compare(a->name);
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.open();
+    }
 
 
     std::vector< std::pair< std::string, char > > getViewColums(char view) override {

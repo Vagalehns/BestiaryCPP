@@ -104,11 +104,51 @@ public:
         return true;
     };
 
+    virtual void filterOptions() {
 
+    }
+
+    void sortOptions() override {
+        Menu sortMenu("Pick sort option", "Don't sort");
+
+        sortMenu.addItem({
+            "Sort by name",
+            ([this]() -> MenuReturn {
+                this->sort(&Keeper::name, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+
+        sortMenu.addItem({
+            "Sort by surname",
+            ([this]() -> MenuReturn {
+                this->sort(&Keeper::surname, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+
+
+        sortMenu.addItem({
+            "Sort by address",
+            ([this]() -> MenuReturn {
+                this->sort(&Keeper::address, [](Address A, Address B) {
+                    return genericStringSort(A.toString(), B.toString());
+                });
+                return {BACK, ""};
+            })
+        });
+
+
+        sortMenu.open();
+    };
 
         std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"Surname", 's'}, {"Phone number", 's'},  {"Address", 's'}};
             };
+
+
 
 
         std::vector<std::string> getAsStrings(Keeper &ref, char view) override {

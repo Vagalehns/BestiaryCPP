@@ -86,11 +86,15 @@ class DB {
         DB() : rand_engine(seed_value){}
 
         template <typename T, typename Pred>
-        void order(T DT::* memberPtr, Pred pred);
+        void sort(T DT::* memberPtr, Pred pred);
 
         template <typename T, typename Pred>
         void filterByField(T DT::* memberPtr, Pred pred);
+
+
+
         void resetFilter();
+        void deleteFiltered();
         unsigned int countFiltered();
         unsigned int getByFilteredIndex( unsigned int filtered_index);
 
@@ -121,15 +125,15 @@ class DB {
         KeyID display(char view = 0, bool picker = false);
         std::pair<std::vector<std::string>, std::string> renderTable(TableStyle table_style, char view);
 
-
-
-
         virtual bool inputForm(DT &new_object, bool edit)=0;
 
         // File operations
         virtual std::string convertToCSVLine(int index)=0;
         virtual std::string getCSVHeader()=0;
         virtual DT getFromCSVline(std::string CSV_line)=0;
+
+        virtual void sortOptions()=0;
+        virtual void filterOptions()=0;
 
         bool saveToCSVFile(std::string filename, std::string location);
         bool readFromCSVFile(std::string filename, std::string location, bool clear=true);

@@ -8,6 +8,7 @@
 
 #include "../genericDatabase.h"
 #include "../../TUI_functions.h"
+#include "../../TUI_functions/Menu.h"
 
 
 struct Enclosure : DefaultStruct {
@@ -53,6 +54,43 @@ public:
         return true;
     };
 
+    void sortOptions() override {
+        Menu sortMenu("Pick sort option", "Don't sort");
+
+        sortMenu.addItem({
+            "Sort by name",
+            ([this]() -> MenuReturn {
+                this->sort(&Enclosure::name, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by section",
+            ([this]() -> MenuReturn {
+                this->sort(&Enclosure::section, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by type",
+            ([this]() -> MenuReturn {
+                this->sort(&Enclosure::type, [](unsigned int A, unsigned int B) {
+                    return genericStringSort(EnclosuresTypes[A], EnclosuresTypes[B]);
+                });
+                return {BACK, ""};
+            })
+        });
+
+
+        sortMenu.open();
+    };
+
+
+    virtual void filterOptions() {
+
+    }
 
         std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"Section", 's'}, {"Type", 's'}};

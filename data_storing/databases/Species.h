@@ -71,6 +71,55 @@ public:
     };
 
 
+    virtual void filterOptions() {
+
+    }
+
+
+    void sortOptions() override {
+        Menu sortMenu("Pick sort option", "Don't sort");
+
+        sortMenu.addItem({
+            "Sort by name",
+            ([this]() -> MenuReturn {
+                this->sort(&Species::name, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by latin name",
+            ([this]() -> MenuReturn {
+                this->sort(&Species::latin_name, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+
+        sortMenu.addItem({
+            "Sort by region",
+            ([this]() -> MenuReturn {
+
+                this->sort(&Species::RegionID, [](ExternalKey<Region> A, ExternalKey<Region> B) -> int {
+
+                    auto a = A.get();
+                    auto b = B.get();
+
+                    if (a == nullptr)  return 1;
+
+                    if (b == nullptr) return -1;
+
+                    return b->name.compare(a->name);
+                });
+
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.open();
+    }
+
+
     std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
         return {{"ID", 'i'}, {"Name", 's'}, {"Latin name", 's'}, {"Icon", 's'}, {"Region", 's'}};
     };

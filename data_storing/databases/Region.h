@@ -112,6 +112,34 @@ public:
         return true;
     };
 
+    virtual void filterOptions() {
+
+    }
+
+    void sortOptions() override {
+        Menu sortMenu("Pick sort option", "Don't sort");
+
+        sortMenu.addItem({
+            "Sort by name",
+            ([this]() -> MenuReturn {
+                this->sort(&Region::name, genericStringSort);
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.addItem({
+            "Sort by first level region",
+            ([this]() -> MenuReturn {
+                this->sort(&Region::first_level_region, [](FirstLevelRegion A, FirstLevelRegion B) {
+                    return genericStringSort(FirstLevelRegionStrings[A], FirstLevelRegionStrings[B]);
+                });
+                return {BACK, ""};
+            })
+        });
+
+        sortMenu.open();
+    };
+
 
         std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}};
