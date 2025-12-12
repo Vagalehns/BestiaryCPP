@@ -6,8 +6,7 @@
 #define BESTIARYCPP_ENCLOSURE_H
 
 
-#include "../genericDataBase.h"
-#include "../tableV2.h"
+#include "../genericDatabase.h"
 #include "../../TUI_functions.h"
 
 
@@ -47,18 +46,18 @@ public:
         };
 
 
-        std::vector<TableV2Column> getBaseViewColums() override {
+        std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"Section", 's'}, {"Type", 's'}};
             };
 
-        std::function<void(TableV2&, Enclosure&)> getBaseViewAddItemsFunc() override {
-            return [](TableV2& t, Enclosure& r) {
-                t.addItem(r.ID);
-                t.addItem(r.name);
-                t.addItem(r.section);
-                t.addItem(EnclosuresTypes[r.type]);
-            };
-        };
+        std::vector<std::string> getAsStrings(Enclosure &ref) override {
+            std::vector<std::string> result;
+            result.push_back(std::to_string(ref.ID));
+            result.push_back(ref.name);
+            result.push_back(ref.section);
+            result.push_back(EnclosuresTypes[ref.type]);
+            return result;
+        }
 
 
         std::string convertToCSVLine(int index) override {

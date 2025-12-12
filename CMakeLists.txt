@@ -13,7 +13,6 @@ add_executable(BestiaryCPP main.cpp
         data_storing/genericDataBase.h
         data_storing/databases/Region.h
         data_storing/dbParameters.h
-        data_storing/tableV2.h
         TUI_functions/Menu.cpp
         TUI_functions/Menu.h
         data_storing/databases/Species.h
@@ -22,4 +21,5 @@ add_executable(BestiaryCPP main.cpp
         data_storing/databases/Animal.h
         file_functions.cpp
         file_functions.h
+        data_storing/genericDatabaseDisplay.tpp
 )

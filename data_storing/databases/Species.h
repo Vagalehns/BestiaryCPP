@@ -6,8 +6,7 @@
 #define BESTIARYCPP_SPECIES_H
 
 
-#include "../genericDataBase.h"
-#include "../tableV2.h"
+#include "../genericDatabase.h"
 #include "../../TUI_functions.h"
 #include "Region.h"
 
@@ -63,26 +62,29 @@ public:
     };
 
 
-    std::vector<TableV2Column> getBaseViewColums() override {
+    std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
         return {{"ID", 'i'}, {"Name", 's'}, {"Latin name", 's'}, {"Icon", 's'}, {"Region", 's'}};
     };
 
-    std::function<void(TableV2&, Species&)> getBaseViewAddItemsFunc() override {
-        return [](TableV2& t, Species& r) {
-            t.addItem(r.ID);
-            t.addItem(r.name);
-            t.addItem(r.latin_name);
-            t.addItem(SpeciesEmojiIcons[r.icon]);
+    std::vector<std::string> getAsStrings(Species &ref) override {
+        std::vector<std::string> result;
 
-            Region *region=r.RegionID.get();
 
-                if (region==nullptr) {
-                    t.addItem("Unvalid key");
-                }else {
-                    t.addItem(region->name);
-                };
-            };
+        result.push_back(std::to_string(ref.ID));
+        result.push_back(ref.name);
+        result.push_back(ref.latin_name);
+        result.push_back(SpeciesEmojiIcons[ref.icon]);
+
+        Region *region=ref.RegionID.get();
+
+        if (region==nullptr) {
+            result.push_back("Unvalid key");
+        }else {
+            result.push_back(region->name);
         };
+
+        return result;
+    }
 
         std::string convertToCSVLine(int index) override {
             std::stringstream ss;

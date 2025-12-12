@@ -10,8 +10,7 @@
 #include "Enclosure.h"
 #include "Keeper.h"
 #include "Species.h"
-#include "../genericDataBase.h"
-#include "../tableV2.h"
+#include "../genericDatabase.h"
 #include "../../TUI_functions.h"
 
 struct Weight {
@@ -237,43 +236,45 @@ public:
         return true;
     };
 
-    std::vector<TableV2Column> getBaseViewColums() override {
+    std::vector< std::pair< std::string, char > > getBaseViewColums() override {
         return {{"ID", 'i'}, {"Name", 's'}, {"Sex", 's'}, {"Species", 's'}, {"Keeper", 's'}, {"Enclosure", 's'}, {"DOB", 's'}, {"Weight", 'i'}, {"Last veterinary check", 's'} };
     };
 
-    std::function<void(TableV2&, Animal&)> getBaseViewAddItemsFunc() override {
-        return [](TableV2& t, Animal& r) {
-            t.addItem(r.ID);
-            t.addItem(r.name);
-            t.addItem(r.sex ? "Male" : "Female");
+    std::vector<std::string> getAsStrings(Animal &ref) override {
+        std::vector<std::string> result;
 
-            Species *s = r.species.get();
-            if (s != nullptr) {
-                t.addItem(s->name);
-            }else {
-                t.addItem("Invalid key");
-            }
+        result.push_back(std::to_string(ref.ID));
+        result.push_back(ref.name);
+        result.push_back(ref.sex ? "Male" : "Female");
 
-            Keeper *k = r.keeper.get();
-            if (k != nullptr) {
-                t.addItem(k->name + " " + k->surname);
-            }else {
-                t.addItem("Invalid key");
-            }
 
-            Enclosure *e = r.enclosure.get();
-            if (e != nullptr) {
-                t.addItem(e->name);
-            }else {
-                t.addItem("Invalid key");
-            }
+        Species *s = ref.species.get();
+        if (s != nullptr) {
+            result.push_back(s->name);
+        }else {
+            result.push_back("Invalid key");
+        }
 
-            t.addItem(formatTime(r.date_of_birth));
-            t.addItem(r.weight.display());
-            t.addItem(formatTime(r.last_veterinary_check));
+        Keeper *k = ref.keeper.get();
+        if (k != nullptr) {
+            result.push_back(k->name + " " + k->surname);
+        }else {
+            result.push_back("Invalid key");
+        }
 
-        };
-    };
+        Enclosure *e = ref.enclosure.get();
+        if (e != nullptr) {
+            result.push_back(e->name);
+        }else {
+            result.push_back("Invalid key");
+        }
+
+        result.push_back(formatTime(ref.date_of_birth));
+        result.push_back(ref.weight.display());
+        result.push_back(formatTime(ref.last_veterinary_check));
+
+        return result;
+    }
 
     std::string convertToCSVLine(int index) override {
         std::stringstream ss;

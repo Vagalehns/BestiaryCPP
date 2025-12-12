@@ -10,6 +10,18 @@
 
 int main(int argc, char **argv) {
 
+
+
+
+
+
+    RegionDB regionDB;
+
+    regionDB.baseView();
+
+
+    return 0;
+
     SetConsoleOutputCP(CP_UTF8);
 
     AppState appState;

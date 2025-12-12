@@ -5,6 +5,8 @@
 #ifndef BESTIARYCPP_BESTIARYAPP_H
 #define BESTIARYCPP_BESTIARYAPP_H
 
+#include <filesystem>
+
 #include "TUI_functions.h"
 #include "data_storing/databases/Enclosure.h"
 #include "data_storing/databases/Keeper.h"

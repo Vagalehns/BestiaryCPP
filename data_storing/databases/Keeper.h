@@ -5,8 +5,7 @@
 #ifndef BESTIARYCPP_KEEPERS_H
 #define BESTIARYCPP_KEEPERS_H
 
-#include "../genericDataBase.h"
-#include "../tableV2.h"
+#include "../genericDatabase.h"
 #include "../../TUI_functions.h"
 
 
@@ -96,19 +95,21 @@ public:
 
 
 
-        std::vector<TableV2Column> getBaseViewColums() override {
+        std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"Surname", 's'}, {"Phone number", 's'},  {"Address", 's'}};
             };
 
-        std::function<void(TableV2&, Keeper&)> getBaseViewAddItemsFunc() override {
-            return [](TableV2& t, Keeper& r) {
-                t.addItem(r.ID);
-                t.addItem(r.name);
-                t.addItem(r.surname);
-                t.addItem(r.phone_number.number);
-                t.addItem(r.address.toString());
-            };
-        };
+
+        std::vector<std::string> getAsStrings(Keeper &ref) override {
+            std::vector<std::string> result;
+            result.push_back(std::to_string(ref.ID));
+            result.push_back(ref.name);
+            result.push_back(ref.surname);
+            result.push_back(ref.phone_number.number);
+            result.push_back(ref.address.toString());
+            return result;
+        }
+
 
         std::string convertToCSVLine(int index) override {
             std::stringstream ss;

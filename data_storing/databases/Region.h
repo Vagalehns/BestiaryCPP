@@ -5,8 +5,7 @@
 #ifndef BESTIARYCPP_REGION_H
 #define BESTIARYCPP_REGION_H
 
-#include "../genericDataBase.h"
-#include "../tableV2.h"
+#include "../genericDatabase.h"
 #include "../../TUI_functions.h"
 
 
@@ -110,17 +109,18 @@ public:
         };
 
 
-        std::vector<TableV2Column> getBaseViewColums() override {
+        std::vector< std::pair< std::string, char > > getBaseViewColums()  override {
                 return {{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}};
             };
 
-        std::function<void(TableV2&, Region&)> getBaseViewAddItemsFunc() override {
-            return [](TableV2& t, Region& r) {
-                t.addItem(r.ID);
-                t.addItem(r.name);
-                t.addItem(FirstLevelRegionStrings[r.first_level_region]);
-            };
-        };
+
+        std::vector<std::string> getAsStrings(Region &ref) override {
+            std::vector<std::string> result;
+            result.push_back(std::to_string(ref.ID));
+            result.push_back(ref.name);
+            result.push_back(FirstLevelRegionStrings[ref.first_level_region]);
+            return result;
+        }
 
         std::string convertToCSVLine(int index) override {
             std::stringstream ss;
