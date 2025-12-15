@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include "stylingFunctions.h"
+
 void clearConsole();
 
 std::string generateTable(std::vector<std::string> data, int columns, bool borders=false);
@@ -43,16 +45,18 @@ int getOptionFromUser(const std::array<const char*, N>& options, std::string que
     int result;
     bool valid=false;
 
+    auto const divider = BRIGHTGREENSTY ">=" + std::string(question.length()-2, '-' ) + "=<" ENDSTY;
+
     do {
         clearConsole();
-        std::cout << question << "\n";
+        std::cout << BLACKSTY BGBRIGHTGREENSTY  " " << question << " " ENDSTY "\n" << divider;
 
         resetListItem();
         for (const auto& opt : options) {
             printListItem(opt);
         }
 
-        std::cout << "\n";
+        std::cout << "\n" << divider << "\n";
         result = getIntFromUser(1, N, ">", true, true) - 1;
 
         valid = getConfirmationFromUser("You picked \"" + std::string(options[result]) + "\". Is that correct?");

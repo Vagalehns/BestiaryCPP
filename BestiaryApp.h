@@ -22,9 +22,13 @@ struct AppState{
     bool nofuzz=false;
     bool vocal=false;
     bool help=false;
+    bool autosave=false;
 };
 
 class BestiaryApp {
+
+    private:
+        const fs::path def_path;
 
     public:
 
@@ -33,7 +37,9 @@ class BestiaryApp {
              menu_view_data,
              menu_load_data,
              menu_save_data,
-             menu_edit_data;
+             menu_edit_data,
+             menu_delete_data,
+             menu_calculations;
 
         AppState State;
 

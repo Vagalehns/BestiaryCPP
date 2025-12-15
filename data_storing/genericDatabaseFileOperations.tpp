@@ -47,7 +47,6 @@ bool DB<DT, MaxData>::readFromCSVFile(fs::path filename, fs::path location, bool
 template<typename DT, unsigned int MaxData>
 bool DB<DT, MaxData>::saveToCSVFile(fs::path filename, fs::path location) {
 
-    filename+=".csv";
     std::ofstream out_file(location / filename );
 
     if (!out_file) {

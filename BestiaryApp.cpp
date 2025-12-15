@@ -20,8 +20,11 @@
 template<class DB>
 auto makeAdd(DB& db, std::string func_name) {
     return [&, func_name]() -> MenuReturn {
+
         if (db.addByForm())
+
             return {STAY_SHOW_MSG, func_name + " added"};
+
         else
             return {STAY_SHOW_ERROR, "Failed to add " + func_name};
     };
@@ -75,7 +78,7 @@ bool BestiaryApp::loadEverything(std::filesystem::path dest, bool clear_data) {
         loaded+=this->speciesDB.readFromCSVFile(DEF_SPECIESDB_FILENAME, dest.string(), clear_data);
         loaded+=this->regionDB.readFromCSVFile(DEF_REGIONDB_FILENAME, dest.string(), clear_data);
 
-        return loaded==5;
+        return loaded == 5;
 
         }else {
             return false;
@@ -105,10 +108,21 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_view_data("View data", "Back"),
     menu_load_data("Load data", "Back"),
     menu_save_data("Save data", "Back"),
-    menu_edit_data("Edit data", "Back"){
+    menu_edit_data("Edit data", "Back"),
+    menu_calculations("Calculations", "Back"),
+    menu_delete_data("Delete data", "Back"),
+    def_path("./autosave"){
 
 
     State = state;
+
+    menu_save_data.addItem({"Auto save", [this]()->MenuReturn {
+
+            ensureFolderExists(def_path);
+            saveEverything(def_path);
+
+            return {STAY_SHOW_MSG, "Successfully saved"};
+    }});
 
     menu_save_data.addItem({"Save to zip", [this]()->MenuReturn {
 
@@ -150,7 +164,10 @@ BestiaryApp::BestiaryApp(AppState state) :
             );;
 
         auto dest=getPathFromUser("Where to save?");
+
         auto filename=getStringFromUser("Input file name", true, "\\/:*?\"<>|\0");
+
+        filename+=".csv";
 
         bool saved;
         switch (table_choice) {
@@ -180,6 +197,21 @@ BestiaryApp::BestiaryApp(AppState state) :
         }
 
     }});
+
+
+    menu_load_data.addItem({"Autoload", [this]()->MenuReturn {
+
+        clearConsole();
+
+        if (loadEverything(def_path, true)) {
+            return {STAY_SHOW_MSG, "Table loaded"};
+        }else {
+            return {STAY_SHOW_ERROR, "Failed to load properly"};
+        }
+
+
+
+}});
 
     menu_load_data.addItem({"Load from folder", [this]()->MenuReturn {
 
@@ -268,6 +300,7 @@ BestiaryApp::BestiaryApp(AppState state) :
 
     }});
 
+    Menu deletion_submenu("Delete by picking individually", "Back");
 
 
 
@@ -294,6 +327,9 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_start.addItem({"View data", [this]()->MenuReturn{return this->menu_view_data.open();}});
     menu_start.addItem({"Load data", [this]()->MenuReturn{return this->menu_load_data.open();}});
     menu_start.addItem({"Save data", [this]()->MenuReturn{return this->menu_save_data.open();}});
+    menu_start.addItem({"Delete data", [this]()->MenuReturn{return this->menu_delete_data.open();}} );
+    menu_start.addItem({"Calculations", [this]()->MenuReturn{return this->menu_calculations.open();}} );
+
 }
 
 bool BestiaryApp::Run() {

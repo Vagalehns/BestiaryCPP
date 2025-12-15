@@ -227,6 +227,8 @@ public:
                 new_object.date_of_weighting = getTimeFromUser("Write Last date of weighing");
             }
 
+            clearConsole();
+
             if (!edit || getConfirmationFromUser("Do you want to edit sex?")) {
                 new_object.sex = getConfirmationFromUser("Is the animal male?");
             }

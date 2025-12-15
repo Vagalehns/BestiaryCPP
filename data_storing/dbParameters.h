@@ -10,11 +10,11 @@
 #define CSV_SEP ','
 #define TOO_MANY_ITERS 100000
 
-#define MAX_REGIONS 40
-#define MAX_SPECIES 30
-#define MAX_KEEPERS 25
-#define MAX_ENCLOSURE 50
-#define MAX_ANIMALS 100
+#define MAX_REGIONS 50
+#define MAX_SPECIES 100
+#define MAX_KEEPERS 80
+#define MAX_ENCLOSURE 80
+#define MAX_ANIMALS 200
 
 
 enum FirstLevelRegion {
@@ -99,14 +99,12 @@ constexpr std::array<const char*, 12> EnclosuresTypes = {
 };
 
 enum WeightMeasurement {
-    _First = 0,
     Kilogram,
     Gram,
     Milligram,
     Pound,
     Ton,
-    Ounce,
-    _Last = Ounce
+    Ounce
 };
 
 constexpr std::array<const char*, 6> WeightMeasurementPrefix = {

@@ -65,7 +65,7 @@ void printListItem(std::string item, bool reset) {
         return;
     }
 
-    std::cout << "\n" << index << ")\t" << item ;
+    std::cout << "\n" << BRIGHTGREENSTY << index << ")\t" ENDSTY << item ;
     index++;
 };
 
@@ -189,7 +189,7 @@ std::string getStringFromUser(const std::string &question, bool with_confirmatio
         valid = true;
     }
 
-    std::cout << BGBRIGHTBLUESTY "~" << question << "~" ENDSTY;
+    std::cout << BLACKSTY BGBRIGHTGREENSTY " " << question << " " ENDSTY;
     do {
 
         std::cout << std::endl << ">";
@@ -237,7 +237,7 @@ std::time_t getTimeFromUser(const std::string &question, std::string time_format
 
     bool confirmed = false;
     do {
-        std::cout << question << " (format: " << time_format << "): ";
+        std::cout << BLACKSTY BGBRIGHTGREENSTY << question << " (format: " << time_format << ")\n" ENDSTY;
         std::getline(std::cin, input);
 
         timeStruct = {};
