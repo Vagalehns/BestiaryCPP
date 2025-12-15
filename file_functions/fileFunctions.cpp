@@ -2,11 +2,11 @@
 // Created by arman on 11/26/2025.
 //
 
-#include "file_functions.h"
+#include "fileFunctions.h"
 
 #include <iostream>
 
-#include "TUI_functions.h"
+#include "../TUI_functions/TUI_functions.h"
 
 bool checkIfDirectoryExists(fs::path path) {
     return fs::is_directory(path);

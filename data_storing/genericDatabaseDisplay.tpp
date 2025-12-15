@@ -2,8 +2,8 @@
 
 #define MAX_PAGE_SIZE 14
 
-#include "../TUI_functions.h"
-#include "../styling_functions.h"
+#include "../TUI_functions/TUI_functions.h"
+#include "../TUI_functions/stylingFunctions.h"
 
 struct TableStyle {
 

@@ -11,7 +11,7 @@
 #include "Keeper.h"
 #include "Species.h"
 #include "../genericDatabase.h"
-#include "../../TUI_functions.h"
+#include "../../TUI_functions/TUI_functions.h"
 #include "../../TUI_functions/Menu.h"
 
 struct Weight {

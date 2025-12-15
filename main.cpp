@@ -5,7 +5,7 @@
 #include "BestiaryApp.h"
 #include <windows.h>
 
-#include "file_functions.h"
+#include "file_functions/fileFunctions.h"
 #include "data_storing/databases/Keeper.h"
 
 int main(int argc, char **argv) {

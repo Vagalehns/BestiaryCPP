@@ -7,7 +7,7 @@
 
 
 #include "../genericDatabase.h"
-#include "../../TUI_functions.h"
+#include "../../TUI_functions/TUI_functions.h"
 #include "Region.h"
 
 struct Species : DefaultStruct {

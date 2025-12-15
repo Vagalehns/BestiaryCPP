@@ -10,10 +10,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "styling_functions.h"
+#include "stylingFunctions.h"
 #include <string>
 
-#include "info.h"
+#include "../info.h"
 
 
 void clearConsole() {

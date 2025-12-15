@@ -53,7 +53,8 @@
 #else
 // ANSI codes (same as your original definitions)
 // Foreground colors (regular)
-#define CLEARSTYLE    ""
+// Foreground colors (regular)
+#define CLEARSTYLE    "" // Not used for color, but for consistency if needed
 #define BLACKSTY      "\033[30m"
 #define REDSTY        "\033[31m"
 #define GREENSTY      "\033[32m"
@@ -72,11 +73,6 @@
 #define BRIGHTMAGENTASTY "\033[95m"
 #define BRIGHTCYANSTY   "\033[96m"
 #define BRIGHTWHITESTY  "\033[97m"
-
-// Bold, italic, underline
-#define BOLDSTY      "\033[1m"
-#define ITALICSTY    "\033[3m"
-#define UNDERLINESTY "\033[4m"
 
 // Background colors
 #define BGBLACKSTY      "\033[40m"
@@ -97,6 +93,13 @@
 #define BGBRIGHTMAGENTASTY "\033[105m"
 #define BGBRIGHTCYANSTY   "\033[106m"
 #define BGBRIGHTWHITESTY  "\033[107m"
+
+// Text formatting
+#define BOLDSTY      "\033[1m"
+#define ITALICSTY    "\033[3m"
+#define UNDERLINESTY "\033[4m"
+
+// Reset
 #define ENDSTY       "\033[0m"
 #endif
 

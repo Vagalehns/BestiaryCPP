@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(BestiaryCPP main.cpp
         info.h
-        TUI_functions.cpp
-        TUI_functions.h
-        styling_functions.h
+        TUI_functions/TUI_functions.cpp
+        TUI_functions/TUI_functions.h
+        TUI_functions/stylingFunctions.h
         BestiaryApp.cpp
         BestiaryApp.h
         data_storing/genericDataBase.h
@@ -19,7 +19,7 @@ add_executable(BestiaryCPP main.cpp
         data_storing/databases/Keeper.h
         data_storing/databases/Enclosure.h
         data_storing/databases/Animal.h
-        file_functions.cpp
-        file_functions.h
+        file_functions/fileFunctions.cpp
+        file_functions/fileFunctions.h
         data_storing/genericDatabaseDisplay.tpp
 )

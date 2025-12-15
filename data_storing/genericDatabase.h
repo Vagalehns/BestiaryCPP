@@ -9,7 +9,7 @@
 #include <random>
 #include <string>
 #include <fstream>
-#include "../TUI_functions.h"
+#include "../TUI_functions/TUI_functions.h"
 
 #include "dbParameters.h"
 
@@ -27,7 +27,7 @@ struct DefaultStruct {
         ID=0;
     };
 
-    DefaultStruct(KeyID id) : ID(id) {};
+    explicit DefaultStruct(KeyID id) : ID(id) {};
 
     void display() {
 

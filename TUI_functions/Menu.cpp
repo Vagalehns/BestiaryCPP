@@ -3,8 +3,8 @@
 //
 
 #include "Menu.h"
-#include "../TUI_functions.h"
-#include "../styling_functions.h"
+#include "TUI_functions.h"
+#include "stylingFunctions.h"
 
 Menu::Menu(std::string title, std::string exit_name)  {
 

@@ -4,9 +4,9 @@
 
 #include "BestiaryApp.h"
 
-#include "file_functions.h"
+#include "file_functions/fileFunctions.h"
 #include "info.h"
-#include "styling_functions.h"
+#include "TUI_functions/stylingFunctions.h"
 
 
 #define DEF_ANIMALDB_FILENAME "animal_db.csv"
@@ -15,10 +15,7 @@
 #define DEF_SPECIESDB_FILENAME "species_db.csv"
 #define DEF_REGIONDB_FILENAME "regions_db.csv"
 
-inline bool echo(const std::string &str ){
-    std::cout << str << std::endl;
-    return true;
-};
+
 
 template<class DB>
 auto makeAdd(DB& db, std::string func_name) {
@@ -282,19 +279,17 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_add_data.addItem({"Add keeper",    makeAdd(keeperDB, "Keeper")});
     menu_add_data.addItem({"Add enclosure", makeAdd(enclosureDB, "Enclosure")});
 
-    menu_edit_data.addItem({"Add region",    makeEdit(regionDB, "Region")});
-    menu_edit_data.addItem({"Add species",   makeEdit(speciesDB, "Species")});
-    menu_edit_data.addItem({"Add animal",    makeEdit(animalDB, "Animal")});
-    menu_edit_data.addItem({"Add keeper",    makeEdit(keeperDB, "Keeper")});
-    menu_edit_data.addItem({"Add enclosure", makeEdit(enclosureDB, "Enclosure")});
+    menu_edit_data.addItem({"Edit region",    makeEdit(regionDB, "Region")});
+    menu_edit_data.addItem({"Edit species",   makeEdit(speciesDB, "Species")});
+    menu_edit_data.addItem({"Edit animal",    makeEdit(animalDB, "Animal")});
+    menu_edit_data.addItem({"Edit keeper",    makeEdit(keeperDB, "Keeper")});
+    menu_edit_data.addItem({"Edit enclosure", makeEdit(enclosureDB, "Enclosure")});
 
     menu_view_data.addItem({"View region",    makeView(regionDB)});
     menu_view_data.addItem({"View species",   makeView(speciesDB)});
     menu_view_data.addItem({"View animal",    makeView(animalDB)});
     menu_view_data.addItem({"View keeper",    makeView(keeperDB)});
     menu_view_data.addItem({"View enclosure", makeView(enclosureDB)});
-
-    menu_view_data.addItem({"View feeding", []()->MenuReturn{return MenuReturn(STAY);}});
 
     menu_start.addItem({"Add data", [this]()->MenuReturn{return this->menu_add_data.open();}});
     menu_start.addItem({"Edit data", [this]()->MenuReturn{return this->menu_edit_data.open();}});
