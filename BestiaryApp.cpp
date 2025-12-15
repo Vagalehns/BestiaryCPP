@@ -119,14 +119,12 @@ BestiaryApp::BestiaryApp(AppState state) :
 
             filename+=".zip";
 
-
             std::filesystem::path temp_path="./temp_save_folder";
 
             createFolder(temp_path);
             saveEverything(temp_path);
             zipFolder(temp_path, (dest / filename));
             removeFile(temp_path);
-
 
             return {STAY_SHOW_MSG, "Zip successfully saved"};
     }});

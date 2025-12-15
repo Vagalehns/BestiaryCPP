@@ -31,10 +31,20 @@ struct TableStyle {
 
     };
 
+struct Render {
+    std::vector<std::string> pages;
+    std::string header;
+    unsigned int width;
 
+    Render(std::vector<std::string> pages, std::string header, unsigned int width) {
+        this->pages = pages;
+        this->header = header;
+        this->width = width;
+    };
+};
 
 template<typename DT, unsigned int MaxData>
-std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(TableStyle ts, char view) {
+Render DB<DT, MaxData>::renderTable(TableStyle ts, char view) {
 
     std::vector<std::string> pages_rendered;
     std::string header;
@@ -60,7 +70,7 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
         }
     }
 
-    int table_width = 0;
+    unsigned int table_width = 0;
 
     for (auto& col : column_widths) {
         table_width += col;
@@ -189,12 +199,12 @@ std::pair<std::vector<std::string>, std::string> DB<DT, MaxData>::renderTable(Ta
 
     pages_rendered.emplace_back(cur_page.str());
 
-    return {pages_rendered, header};
+    return {pages_rendered, header, table_width+left_space_width};
 };
 
 
 template<typename DT, unsigned int MaxData>
-KeyID DB<DT, MaxData>::display(char view, bool picker) {
+KeyID DB<DT, MaxData>::display(char view, bool picker, std::string title) {
 
     auto ts = TableStyle();
 
@@ -203,12 +213,11 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
         ts.outer_border_hor_symb = '?';
         ts.is_numbered = true;
 
-
         resetFilter();
     }
 
 
-    auto [page_renders, header_render] = this->renderTable(ts, view);
+    auto render = this->renderTable(ts, view);
 
     int cur_page=1;
     bool show_table = true;
@@ -218,12 +227,16 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
     do {
         clearConsole();
 
-        std::cout << header_render << std::endl;
+        if (!title.empty()) {
+            std::cout << BLACKSTY BGBRIGHTGREENSTY << padString(title, render.width, ' ', true ) << ENDSTY << std::endl;
+        }
 
-        std::cout << page_renders[cur_page-1];
+        std::cout << render.header << std::endl;
 
-        std::cout << GREENSTY BOLDSTY "\nPage " << cur_page << " from " << page_renders.size() << ENDSTY;
-        std::cout <<  "\nSelect page number, or use 0 (next), -1 (prev), -2 (sort), -3 (search/filter), -4 (delete currently selected), -5" ;
+        std::cout << render.pages[cur_page-1];
+
+        std::cout << GREENSTY BOLDSTY "\nPage " << cur_page << " from " << render.pages.size() << ENDSTY;
+        std::cout <<  "\nSelect page number, or use 0  (next),\n\t\t\t   -1 (prev),\n\t\t\t   -2 (sort),\n\t\t\t   -3 (search/filter),\n\t\t\t   -4 (delete currently selected),\n\t\t\t   -5" ;
 
         if (picker) {
             std::cout << " (pick)";
@@ -234,12 +247,12 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
         std::cout << "\n";
 
 
-        int user_choice=getIntFromUser(-5, page_renders.size(), ">", true, true);
+        int user_choice=getIntFromUser(-5, render.pages.size(), ">", true, true);
 
 
         switch (user_choice) {
             case 0:
-                if (cur_page!=page_renders.size()) cur_page+=1;
+                if (cur_page!=render.pages.size()) cur_page+=1;
                 break;
             case -1:
                 if (cur_page!=1) cur_page-=1;
@@ -247,11 +260,11 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
 
             case -2:
                 this->sortOptions();
-                page_renders= this->renderTable(ts, view).first;
+                render = this->renderTable(ts, view);
                 break;
             case -3:
                 this->filterOptions();
-                page_renders= this->renderTable(ts, view).first;
+                render = this->renderTable(ts, view);
                 break;
 
             case -4:
@@ -264,7 +277,7 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
                     }else {
                         deleteFiltered();
                         resetFilter();
-                        page_renders= this->renderTable(ts, view).first;
+                        render = this->renderTable(ts, view);
 
                     }
                 };
@@ -297,4 +310,116 @@ KeyID DB<DT, MaxData>::display(char view, bool picker) {
 
     return id_picked;
 }
+
+
+
+template<typename DT, unsigned int MaxData>
+KeyID DB<DT, MaxData>::pickByUser(bool &successful, std::string question) {
+
+    if (isEmpty()) {
+        successful = false;
+        return 0;
+    }
+
+    successful = true;
+
+    KeyID id_picked= display(0, true, question);
+    return data[id_picked].ID;
+};
+
+
+
+template<typename DT, unsigned int MaxData>
+bool DB<DT, MaxData>::editByForm() {
+    if (isEmpty()) {
+        return false;
+    }
+
+    unsigned int data_to_edit_index = display(0, true);
+
+    auto &data_to_edit = data[data_to_edit_index];
+
+    bool confirm = false;
+    bool impossible = false;
+
+    do {
+        clearConsole();
+
+        bool form_success = inputForm(data_to_edit, true);
+
+        if (!form_success) {
+            impossible=true;
+            continue;
+        }
+
+        clearConsole();
+        std::cout<<"Confirm edit?\n\n";
+
+        data_to_edit.display();
+        std::cout << "\n\n";
+        confirm = getConfirmationFromUser(">");
+
+        if (!confirm) {
+            std::cout<<"Do you want to cancel?";
+            if (getConfirmationFromUser(">")) {
+                return false;
+            }
+        }
+
+    } while (!confirm && !impossible);
+
+    if (impossible) {
+        return false;
+    }
+
+    return true;
+};
+
+
+
+template<typename DT, unsigned int MaxData>
+bool DB<DT, MaxData>::addByForm() {
+
+    if (isFull()) {
+        return false;
+    }
+
+    DT new_dt;
+    bool confirm = false;
+    bool impossible = false;
+
+    do {
+        clearConsole();
+
+        bool form_success = inputForm(new_dt, false);
+
+        if (!form_success) {
+            impossible=true;
+            continue;
+        }
+
+        clearConsole();
+        std::cout<<"Do you want to add?\n\n";
+
+        new_dt.display();
+        std::cout << "\n\n";
+        confirm = getConfirmationFromUser(">");
+
+        if (!confirm) {
+            std::cout<<"Do you want to cancel?";
+            if (getConfirmationFromUser(">")) {
+                return false;
+            }
+        }
+
+    } while (!confirm && !impossible);
+
+    if (impossible) {
+        return false;
+    }
+
+    appendAutoID(new_dt);
+    return true;
+}
+
 

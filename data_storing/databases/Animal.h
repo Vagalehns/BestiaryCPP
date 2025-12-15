@@ -180,23 +180,23 @@ struct Animal : DefaultStruct {
 class AnimalDB : public DB<Animal, MAX_ANIMALS> {
 
     std::function<Species*(KeyID)> species_resolver;
-    std::function<KeyID(bool&)> species_picker;
+    std::function<KeyID(bool &, std::string)> species_picker;
 
     std::function<Keeper*(KeyID)> keeper_resolver;
-    std::function<KeyID(bool&)> keeper_picker;
+    std::function<KeyID(bool &, std::string)> keeper_picker;
 
     std::function<Enclosure*(KeyID)> enclosure_resolver;
-    std::function<KeyID(bool&)> enclosure_picker;
+    std::function<KeyID(bool &, std::string)> enclosure_picker;
 
 public:
 
     AnimalDB(
         std::function<Species*(KeyID)> species_resolver,
-        std::function<KeyID(bool&)> species_picker,
+        std::function<KeyID(bool &, std::string)> species_picker,
         std::function<Keeper*(KeyID)> keeper_resolver,
-        std::function<KeyID(bool&)> keeper_picker,
+        std::function<KeyID(bool &, std::string)> keeper_picker,
         std::function<Enclosure*(KeyID)> enclosure_resolver,
-        std::function<KeyID(bool&)> enclosure_picker ) {
+        std::function<KeyID(bool &, std::string)> enclosure_picker ) {
 
         this->species_resolver = species_resolver;
         this->species_picker = species_picker;
@@ -240,17 +240,17 @@ public:
             bool success;
 
             if (!edit || getConfirmationFromUser("Do you want to edit species?")) {
-                new_object.species=ExternalKey(species_picker(success), species_resolver);
+                new_object.species=ExternalKey(species_picker(success, "Pick the species of the animal"), species_resolver);
                 if (!success) return false;
             }
 
             if (!edit || getConfirmationFromUser("Do you want to edit keeper?")) {
-                new_object.keeper=ExternalKey(keeper_picker(success), keeper_resolver);
+                new_object.keeper=ExternalKey(keeper_picker(success, "Pick the keeper of the animal"), keeper_resolver);
                 if (!success) return false;
             }
 
             if (!edit || getConfirmationFromUser("Do you want to edit enclosure?")) {
-                new_object.enclosure=ExternalKey(enclosure_picker(success), enclosure_resolver);
+                new_object.enclosure=ExternalKey(enclosure_picker(success, "Pick the enclosure"), enclosure_resolver);
                 if (!success) return false;
             }
 
@@ -285,7 +285,7 @@ public:
             ([this]() -> MenuReturn {
 
                 bool success;
-                auto s = species_picker(success);
+                auto s = species_picker(success, "Select the species to search by");
 
                 if (!success) {
                     return {STAY_SHOW_ERROR, "Picking the species failed"};
@@ -304,7 +304,7 @@ public:
         ([this]() -> MenuReturn {
 
             bool success;
-            auto k = keeper_picker(success);
+            auto k = keeper_picker(success, "Select the keeper of the animal");
 
             if (!success) {
                 return {STAY_SHOW_ERROR, "Picking the keeper failed"};

@@ -37,10 +37,10 @@ struct Species : DefaultStruct {
 
 class SpeciesDB : public DB<Species, MAX_SPECIES> {
     std::function<Region*(KeyID)> region_resolver;
-    std::function<KeyID(bool &)> region_picker;
+    std::function<KeyID(bool &, std::string)> region_picker;
 public:
 
-    SpeciesDB (std::function<Region*(KeyID)> region_resolver, std::function<KeyID(bool &)> region_picker) {
+    SpeciesDB (std::function<Region*(KeyID)> region_resolver, std::function<KeyID(bool &, std::string)> region_picker) {
         this->region_resolver = region_resolver;
         this->region_picker = region_picker;
     }
@@ -63,7 +63,7 @@ public:
 
         bool success;
         if (!edit || getConfirmationFromUser("Do you want to edit region?")) {
-            new_object.RegionID=ExternalKey(region_picker(success), region_resolver);
+            new_object.RegionID=ExternalKey(region_picker(success, "Pick the region species come from"), region_resolver);
             if (!success) return false;
         }
 

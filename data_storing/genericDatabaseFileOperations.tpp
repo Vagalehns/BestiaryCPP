@@ -2,10 +2,13 @@
 
 #pragma once
 
-template<typename DT, unsigned int MaxData>
-bool DB<DT, MaxData>::readFromCSVFile(std::string filename, std::string location, bool clear) {
 
-    std::ifstream in_file(location+SLASH+filename);
+#include "../file_functions/fileFunctions.h"
+
+template<typename DT, unsigned int MaxData>
+bool DB<DT, MaxData>::readFromCSVFile(fs::path filename, fs::path location, bool clear) {
+
+    std::ifstream in_file(location / filename);
 
     if (!in_file) {
         std::cerr << "Failed to open file." << std::endl;
@@ -42,9 +45,10 @@ bool DB<DT, MaxData>::readFromCSVFile(std::string filename, std::string location
 
 
 template<typename DT, unsigned int MaxData>
-bool DB<DT, MaxData>::saveToCSVFile(std::string filename, std::string location) {
+bool DB<DT, MaxData>::saveToCSVFile(fs::path filename, fs::path location) {
 
-    std::ofstream out_file(location+SLASH+filename);
+    filename+=".csv";
+    std::ofstream out_file(location / filename );
 
     if (!out_file) {
         std::cerr << "Error opening file for writing!" << std::endl;

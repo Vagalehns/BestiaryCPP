@@ -15,6 +15,7 @@
 
 
 struct TableStyle;
+struct Render;
 
 typedef unsigned int KeyID;
 
@@ -113,7 +114,7 @@ class DB {
 
         bool addByForm();
         bool editByForm();
-        KeyID pickByUser(bool &successful);
+        KeyID pickByUser(bool &successful, std::string question);
 
 
 
@@ -122,8 +123,9 @@ class DB {
         virtual std::vector<std::pair< std::string, char>> getViewColums(char view) =0;
         virtual std::vector<std::string> getAsStrings(DT &ref, char view)=0;
 
-        KeyID display(char view = 0, bool picker = false);
-        std::pair<std::vector<std::string>, std::string> renderTable(TableStyle table_style, char view);
+        KeyID display(char view = 0, bool picker = false, std::string title = "");
+
+        Render renderTable(TableStyle table_style, char view);
 
         virtual bool inputForm(DT &new_object, bool edit)=0;
 
@@ -135,8 +137,8 @@ class DB {
         virtual void sortOptions()=0;
         virtual void filterOptions()=0;
 
-        bool saveToCSVFile(std::string filename, std::string location);
-        bool readFromCSVFile(std::string filename, std::string location, bool clear=true);
+        bool saveToCSVFile(std::filesystem::path filename, std::filesystem::path location);
+        bool readFromCSVFile(std::filesystem::path filename, std::filesystem::path location, bool clear=true);
 
 
 };
