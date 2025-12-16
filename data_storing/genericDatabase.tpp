@@ -29,6 +29,18 @@ DT* DB<DT, MaxData>::getByID(KeyID ID) {
 }
 
 template<typename DT, unsigned int MaxData>
+bool DB<DT, MaxData>::removeByID(KeyID ID) {
+
+    for (int i = 0; i < counter; i++) {
+        if (data[i].ID == ID) {
+            return removeAtIndex(i);
+        }
+    }
+
+    return false;
+}
+
+template<typename DT, unsigned int MaxData>
 bool DB<DT, MaxData>::removeAtIndex(unsigned int index) {
 
     if (index>=counter) {
@@ -108,12 +120,15 @@ void DB<DT, MaxData>::resetFilter() {
 template<typename DT, unsigned int MaxData>
 void DB<DT, MaxData>::deleteFiltered() {
     for (int i=0; i<counter;) {
+
         if (data[i].filtered_out==false) {
             removeAtIndex(i);
         }else {
             i++;
         }
     }
+
+    resetFilter();
 }
 
 template<typename DT, unsigned int MaxData>
@@ -206,6 +221,20 @@ void DB<DT, MaxData>::filterByField(T DT::* memberPtr, Pred pred) {
 
 
 
+
+template<typename DT, unsigned int MaxData>
+void DB<DT, MaxData>::deleteOrphanedRecords() {
+
+    for (int i=0; i<counter;) {
+
+        if (isRecordOrphan(data[i])) {
+            removeAtIndex(i);
+        }else {
+            i++;
+        }
+    }
+
+};
 
 
 

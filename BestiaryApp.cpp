@@ -15,6 +15,30 @@
 #define DEF_SPECIESDB_FILENAME "species_db.csv"
 #define DEF_REGIONDB_FILENAME "regions_db.csv"
 
+#define SECONDS_PER_YEAR 31536000
+
+template<class DB>
+auto makeDelete(DB& db, std::string func_name) {
+    return [&, func_name]() -> MenuReturn {
+
+        if (db.isEmpty()) return {STAY_SHOW_ERROR, "Table is empty"};
+
+        bool success;
+        auto picked_id = db.pickByUser(success, "Pick " + func_name + " to delete");
+        auto picked = db.getByID(picked_id);
+
+        std::cout << "Are you sure you want to delete?";
+        picked->display();
+
+        if (success && getConfirmationFromUser(">"))
+            if (db.removeByID(picked_id))
+                return {STAY_SHOW_MSG, func_name+ " deleted"};
+
+        return {STAY_SHOW_ERROR, "Failed to delete" + func_name};
+
+    };
+}
+
 
 
 template<class DB>
@@ -111,12 +135,13 @@ BestiaryApp::BestiaryApp(AppState state) :
     menu_edit_data("Edit data", "Back"),
     menu_calculations("Calculations", "Back"),
     menu_delete_data("Delete data", "Back"),
+    deletion_submenu("Delete specific entry", "Back"),
     def_path("./autosave"){
 
 
     State = state;
 
-    menu_save_data.addItem({"Auto save", [this]()->MenuReturn {
+    menu_save_data.addItem({"Autosave", [this]()->MenuReturn {
 
             ensureFolderExists(def_path);
             saveEverything(def_path);
@@ -300,8 +325,87 @@ BestiaryApp::BestiaryApp(AppState state) :
 
     }});
 
-    Menu deletion_submenu("Delete by picking individually", "Back");
 
+    deletion_submenu.addItem({"Delete region",    makeDelete(regionDB, "Region")});
+    deletion_submenu.addItem({"Delete species",   makeDelete(speciesDB, "Species")});
+    deletion_submenu.addItem({"Delete animal",    makeDelete(animalDB, "Animal")});
+    deletion_submenu.addItem({"Delete keeper",    makeDelete(keeperDB, "Keeper")});
+    deletion_submenu.addItem({"Delete enclosure", makeDelete(enclosureDB, "Enclosure")});
+
+    menu_delete_data.addItem({"Delete by picking individually", [this]()->MenuReturn {
+        return deletion_submenu.open();
+    }});
+
+    menu_delete_data.addItem({"Delete enclosure and all the animals in it", [this]()->MenuReturn {
+        if (enclosureDB.isEmpty()) return {STAY_SHOW_ERROR, "Table is empty"};
+
+        bool success;
+        auto picked_id = enclosureDB.pickByUser(success, "Pick enclosure to delete");
+        auto picked = enclosureDB.getByID(picked_id);
+
+        animalDB.resetFilter();
+        animalDB.filterByField(&Animal::enclosure, [picked_id](ExternalKey<Enclosure> A)->bool{return A.ID == picked_id;});
+
+        std::cout << "Are you sure you want to delete?";
+        picked->display();
+        std::cout << "\nAnd " << animalDB.countFiltered() << " animals";
+
+
+
+        if (success && getConfirmationFromUser(">"))
+            if (enclosureDB.removeByID(picked_id)){
+                animalDB.deleteFiltered();
+                return {STAY_SHOW_MSG, "Enclosure deleted"};
+            }
+
+        return {STAY_SHOW_ERROR, "Failed to delete the enclosure"};
+    }});
+
+
+
+    menu_delete_data.addItem({"Delete animals over a certain age", [this]()->MenuReturn {
+        if (animalDB.isEmpty()) return {STAY_SHOW_ERROR, "Table is empty"};
+
+        clearConsole();
+        auto age = getIntFromUser(0, 1, "Pick the age over which to delete: ", false, true);
+
+        animalDB.resetFilter();
+
+        animalDB.filterByField(&Animal::date_of_birth, [age](time_t dob)->bool {
+                time_t minBirthDate = time(nullptr) - (age * SECONDS_PER_YEAR);
+                return dob < minBirthDate;
+        });
+
+        std::cout << "Are you sure you want to delete " << animalDB.countFiltered() << " animals?";
+
+        if (getConfirmationFromUser(">")){
+                animalDB.deleteFiltered();
+                animalDB.resetFilter();
+                return {STAY_SHOW_MSG, "Animals deleted"};
+        }
+
+
+        return {STAY_SHOW_ERROR, "Failed to delete animals"};
+    }});
+
+
+    menu_delete_data.addItem({"Delete all the records with unvalid keys", [this]()->MenuReturn {
+        if (animalDB.isEmpty() &&
+            speciesDB.isEmpty()) return {STAY_SHOW_ERROR, "Table is empty"};
+
+        clearConsole();
+
+        std::cout << "Are you sure?";
+
+        if (getConfirmationFromUser(">")){
+                animalDB.deleteOrphanedRecords();
+                speciesDB.deleteOrphanedRecords();
+                return {STAY_SHOW_MSG, "Records deleted"};
+        }
+
+
+        return {STAY_SHOW_ERROR, "Failed to delete records"};
+    }});
 
 
     menu_add_data.addItem({"Add region",    makeAdd(regionDB, "Region")});

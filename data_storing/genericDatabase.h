@@ -101,6 +101,7 @@ class DB {
 
         DT* getByID(KeyID ID);
         bool removeAtIndex(unsigned int index);
+        bool removeByID(KeyID ID);
         bool checkIUniqueID(KeyID new_ID);
         KeyID getRandID();
         bool appendAutoID(DT new_data);
@@ -136,6 +137,9 @@ class DB {
 
         virtual void sortOptions()=0;
         virtual void filterOptions()=0;
+
+        virtual  bool isRecordOrphan(DT &ref)=0;
+        void deleteOrphanedRecords();
 
         bool saveToCSVFile(std::filesystem::path filename, std::filesystem::path location);
         bool readFromCSVFile(std::filesystem::path filename, std::filesystem::path location, bool clear=true);

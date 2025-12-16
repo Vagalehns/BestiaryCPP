@@ -39,7 +39,8 @@ class BestiaryApp {
              menu_save_data,
              menu_edit_data,
              menu_delete_data,
-             menu_calculations;
+             menu_calculations,
+             deletion_submenu;
 
         AppState State;
 

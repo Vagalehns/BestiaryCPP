@@ -136,4 +136,14 @@ auto static genericTimeSort = [](std::time_t A, std::time_t B) -> int {
 };
 
 
+auto static makeGenericStringFilter(std::string search_term, bool full_match) {
+    return [search_term, full_match](std::string name) -> bool {
+        if (full_match) {
+            return name == search_term;
+        }
+        return name.substr(0, search_term.length())==search_term;
+    };
+}
+
+
 #endif //BESTIARYCPP_TABLESPARAMETERS_H

@@ -106,6 +106,46 @@ public:
 
     virtual void filterOptions() {
 
+        Menu filterMenu("Add filter/search", "View");
+
+        filterMenu.addItem({
+            "Search by name",
+            ([this]() -> MenuReturn {
+
+                std::string search_term = getStringFromUser("Please enter search term:", true);
+                bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+                this->filterByField(&Keeper::name, makeGenericStringFilter(search_term, full_match));
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.addItem({
+        "Search by surname",
+        ([this]() -> MenuReturn {
+
+            std::string search_term = getStringFromUser("Please enter search term:", true);
+            bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+            this->filterByField(&Keeper::surname, makeGenericStringFilter(search_term, full_match));
+
+            return {BACK, ""};
+        })
+    });
+
+
+        filterMenu.addItem({
+            "Clear filters",
+            ([this]() -> MenuReturn {
+
+                this->resetFilter();
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.open();
     }
 
     void sortOptions() override {
@@ -207,6 +247,10 @@ public:
 
             return new_keeper;
         };
+
+    bool isRecordOrphan(Keeper &ref) override {
+        return false;
+    }
 };
 
 #endif //BESTIARYCPP_KEEPERS_H

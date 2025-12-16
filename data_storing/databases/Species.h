@@ -8,6 +8,7 @@
 
 #include "../genericDatabase.h"
 #include "../../TUI_functions/TUI_functions.h"
+#include "../../TUI_functions/Menu.h"
 #include "Region.h"
 
 struct Species : DefaultStruct {
@@ -71,8 +72,68 @@ public:
     };
 
 
-    virtual void filterOptions() {
+    void filterOptions() override {
 
+        Menu filterMenu("Add filter/search", "View");
+
+        filterMenu.addItem({
+            "Search by name",
+            ([this]() -> MenuReturn {
+
+                std::string search_term = getStringFromUser("Please enter search term:", true);
+                bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+                this->filterByField(&Species::name, makeGenericStringFilter(search_term, full_match));
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.addItem({
+            "Search by latin name",
+            ([this]() -> MenuReturn {
+
+                std::string search_term = getStringFromUser("Please enter search term:", true);
+                bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+                this->filterByField(&Species::latin_name, makeGenericStringFilter(search_term, full_match));
+
+                return {BACK, ""};
+            })
+        });
+
+
+        filterMenu.addItem({
+            "Search by region",
+            ([this]() -> MenuReturn {
+
+                bool success;
+                auto r = region_picker(success, "Select the region");
+
+                if (!success) {
+                    return {STAY_SHOW_ERROR, "Picking the region failed"};
+                }
+
+                this->filterByField(&Species::RegionID, [r](const ExternalKey<Region> &region) -> bool {
+                    return region.ID==r;
+                });
+
+                return {STAY, ""};
+            })
+        });
+
+
+        filterMenu.addItem({
+            "Clear filters",
+            ([this]() -> MenuReturn {
+
+                this->resetFilter();
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.open();
     }
 
 
@@ -180,6 +241,10 @@ public:
 
             return new_species;
         };
+
+    bool isRecordOrphan(Species &ref) override {
+        return ref.RegionID.get()==nullptr;
+    }
 };
 
 

@@ -17,7 +17,7 @@
 "                                                           OOb\"           "
 
 #define APP_USECASE "Simple CLI zoo management app"
-#define APP_VERSION "0.8"
+#define APP_VERSION "0.9"
 #define APP_AUTHOR "Armands Vagalis"
 #define APP_UPDATE_YEAR "2025"
 

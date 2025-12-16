@@ -16,7 +16,7 @@
 
 struct Weight {
 
-    unsigned long int weight_in_milligrams;
+    unsigned long int weight_in_mg;
     WeightMeasurement preferred_measurement;
 
     static std::string getPrefix(WeightMeasurement measurement) {
@@ -39,37 +39,37 @@ struct Weight {
         switch (measurement) {
             case Kilogram:
                 // 1 Kg = 1,000,000 mg
-                this->weight_in_milligrams = value * 1000000UL;
+                this->weight_in_mg = value * 1000000UL;
                 break;
             case Gram:
                 // 1 g = 1,000 mg
-                this->weight_in_milligrams = value * 1000UL;
+                this->weight_in_mg = value * 1000UL;
                 break;
             case Milligram:
                 // 1 mg = 1 mg
-                this->weight_in_milligrams = value;
+                this->weight_in_mg = value;
                 break;
             case Pound:
                 // 1 lb approx 453,592 mg
-                this->weight_in_milligrams = value * 453592UL;
+                this->weight_in_mg = value * 453592UL;
                 break;
             case Ton:
                 // 1 Ton = 1,000,000,000 mg
-                this->weight_in_milligrams = value * 1000000000UL;
+                this->weight_in_mg = value * 1000000000UL;
                 break;
             case Ounce:
                 // 1 Oz approx 28,350 mg (using integer approximation)
-                this->weight_in_milligrams = value * 28350UL;
+                this->weight_in_mg = value * 28350UL;
                 break;
             default:
-                this->weight_in_milligrams = 0;
+                this->weight_in_mg = 0;
                 break;
         }
     }
 
     std::string display() const {
         double display_value = 0.0;
-        const double mg_value = weight_in_milligrams;
+        const double mg_value = weight_in_mg;
 
         switch (preferred_measurement) {
             case Kilogram:
@@ -261,28 +261,22 @@ public:
 
 
     virtual void filterOptions() {
-        Menu sortMenu("Add filter/search", "View");
+        Menu filterMenu("Add filter/search", "View");
 
-        sortMenu.addItem({
+        filterMenu.addItem({
             "Search by name",
             ([this]() -> MenuReturn {
 
                 std::string search_term = getStringFromUser("Please enter search term:", true);
                 bool full_match = getConfirmationFromUser("Does term must be full match?");
 
-                this->filterByField(&Animal::name, [search_term, full_match](std::string name) -> bool {
-                    if (full_match) {
-                        return name == search_term;
-                    }
-
-                    return name.substr(0, search_term.length())==search_term;
-                });
+                this->filterByField(&Animal::name, makeGenericStringFilter(search_term, full_match));
 
                 return {BACK, ""};
             })
         });
 
-        sortMenu.addItem({
+        filterMenu.addItem({
             "Search by species",
             ([this]() -> MenuReturn {
 
@@ -301,7 +295,7 @@ public:
             })
         });
 
-        sortMenu.addItem({
+        filterMenu.addItem({
         "Search by keeper",
         ([this]() -> MenuReturn {
 
@@ -318,9 +312,47 @@ public:
 
             return {STAY, ""};
         })
-    });
+        });
 
-        sortMenu.addItem({
+        filterMenu.addItem({
+        "Search by enclosure",
+        ([this]() -> MenuReturn {
+
+            bool success;
+            auto k = keeper_picker(success, "Select the enclosure");
+
+            if (!success) {
+                return {STAY_SHOW_ERROR, "Picking the enclosure failed"};
+            }
+
+            this->filterByField(&Animal::enclosure, [k](ExternalKey<Enclosure> enclosure) -> bool {
+                return enclosure.ID==k;
+            });
+
+            return {STAY, ""};
+        })
+        });
+
+        filterMenu.addItem({
+        "Filter by weight",
+        ([this]() -> MenuReturn {
+
+            WeightMeasurement wm = static_cast<WeightMeasurement>(getOptionFromUser(WeightMeasurementFullName, "Pick measurement type!"));
+            auto lower_bound=getIntFromUser(0, -1, "Pick lower weight bound: ", 0, 1);
+            auto upper_bound=getIntFromUser(lower_bound, -1, "Pick upper weight bound: ", 0, 1);
+
+            Weight min(lower_bound, wm), max(upper_bound, wm);
+
+            this->filterByField(&Animal::weight, [min, max](Weight weight) -> bool {
+                return weight.weight_in_mg>=min.weight_in_mg && weight.weight_in_mg<=max.weight_in_mg ;
+            });
+
+            return {STAY, ""};
+        })
+        });
+
+
+        filterMenu.addItem({
             "Clear filters",
             ([this]() -> MenuReturn {
 
@@ -330,7 +362,7 @@ public:
             })
         });
 
-        sortMenu.open();
+        filterMenu.open();
     }
 
 
@@ -350,8 +382,8 @@ public:
             ([this]() -> MenuReturn {
 
                 this->sort(&Animal::weight, [](Weight a, Weight b) {
-                    if (a.weight_in_milligrams<b.weight_in_milligrams) return 1;
-                    if (a.weight_in_milligrams>b.weight_in_milligrams) return -1;
+                    if (a.weight_in_mg<b.weight_in_mg) return 1;
+                    if (a.weight_in_mg>b.weight_in_mg) return -1;
                     return 0;
                 });
 
@@ -505,7 +537,7 @@ public:
 
         ss << di.ID << CSV_SEP;
         ss << di.name << CSV_SEP;
-        ss << di.weight.weight_in_milligrams << CSV_SEP;
+        ss << di.weight.weight_in_mg << CSV_SEP;
         ss << di.weight.preferred_measurement << CSV_SEP;
         ss << di.sex << CSV_SEP;
         ss << di.date_of_birth << CSV_SEP;
@@ -539,7 +571,7 @@ public:
         new_animal.name = temp;
 
         std::getline(ss, temp, CSV_SEP);
-        new_animal.weight.weight_in_milligrams = std::stoul(temp);
+        new_animal.weight.weight_in_mg = std::stoul(temp);
 
         std::getline(ss, temp, CSV_SEP);
         new_animal.weight.preferred_measurement = static_cast<WeightMeasurement>(std::stoi(temp));
@@ -567,6 +599,12 @@ public:
 
         return new_animal;
     };
+
+    bool isRecordOrphan(Animal &ref) override {
+        return ref.keeper.get()==nullptr||
+               ref.enclosure.get()==nullptr||
+               ref.species.get()==nullptr;
+    }
 };
 
 

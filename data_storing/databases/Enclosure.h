@@ -6,6 +6,7 @@
 #define BESTIARYCPP_ENCLOSURE_H
 
 
+#include "Species.h"
 #include "../genericDatabase.h"
 #include "../../TUI_functions/TUI_functions.h"
 #include "../../TUI_functions/Menu.h"
@@ -88,8 +89,50 @@ public:
     };
 
 
-    virtual void filterOptions() {
+    void filterOptions() override {
 
+        Menu filterMenu("Add filter/search", "View");
+
+        filterMenu.addItem({
+            "Search by name",
+            ([this]() -> MenuReturn {
+
+                std::string search_term = getStringFromUser("Please enter search term:", true);
+                bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+                this->filterByField(&Enclosure::name, makeGenericStringFilter(search_term, full_match));
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.addItem({
+            "Filter by type",
+            ([this]() -> MenuReturn {
+
+
+                auto type =  getOptionFromUser(EnclosuresTypes, "Pick enclosure type!");
+
+                this->filterByField(&Enclosure::type, [type](int cur_type) -> bool {
+                    return type==cur_type;
+                });
+
+                return {STAY, ""};
+            })
+        });
+
+
+        filterMenu.addItem({
+            "Clear filters",
+            ([this]() -> MenuReturn {
+
+                this->resetFilter();
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.open();
     }
 
         std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
@@ -138,6 +181,10 @@ public:
 
             return new_enclosure;
         };
+
+    bool isRecordOrphan(Enclosure &ref) override {
+        return false;
+    }
 };
 
 

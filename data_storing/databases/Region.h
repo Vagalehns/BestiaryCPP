@@ -106,15 +106,58 @@ public:
         }
 
         if (!edit || getConfirmationFromUser("Do you want to edit first level region?")) {
-            new_object.first_level_region= (FirstLevelRegion) getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!");
+            new_object.first_level_region= static_cast<FirstLevelRegion>(getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!"));
         }
 
         return true;
     };
 
-    virtual void filterOptions() {
+    void filterOptions() override {
 
+        Menu filterMenu("Add filter/search", "View");
+
+        filterMenu.addItem({
+            "Search by name",
+            ([this]() -> MenuReturn {
+
+                std::string search_term = getStringFromUser("Please enter search term:", true);
+                bool full_match = getConfirmationFromUser("Does term must be full match?");
+
+                this->filterByField(&Region::name, makeGenericStringFilter(search_term, full_match));
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.addItem({
+            "Filter by first level region",
+            ([this]() -> MenuReturn {
+
+
+                auto first_level_region= static_cast<FirstLevelRegion>(getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!"));
+
+                this->filterByField(&Region::first_level_region, [first_level_region](FirstLevelRegion flr) -> bool {
+                    return first_level_region==flr;
+                });
+
+                return {STAY, ""};
+            })
+        });
+
+
+        filterMenu.addItem({
+            "Clear filters",
+            ([this]() -> MenuReturn {
+
+                this->resetFilter();
+
+                return {BACK, ""};
+            })
+        });
+
+        filterMenu.open();
     }
+
 
     void sortOptions() override {
         Menu sortMenu("Pick sort option", "Don't sort");
@@ -182,6 +225,10 @@ public:
 
             return new_region;
         };
+
+    bool isRecordOrphan(Region &ref) override {
+        return false;
+    }
 };
 
 #endif //BESTIARYCPP_REGION_H
