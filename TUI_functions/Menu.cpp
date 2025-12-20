@@ -4,20 +4,19 @@
 
 #include "Menu.h"
 #include "TUI_functions.h"
-#include "stylingFunctions.h"
+#include "styling_functions.h"
 
-Menu::Menu(std::string title, std::string exit_name)  {
-
+Menu::Menu(std::string title, std::string exit_name) {
     this->menu_title = std::move(title);
 
-    this->addItem({BRIGHTREDSTY+std::move(exit_name), []()->MenuReturn {
-        return MenuReturn(BACK);
-    }});
-
+    this->addItem({
+        BRIGHTREDSTY + std::move(exit_name), []()-> MenuReturn {
+            return MenuReturn(BACK);
+        }
+    });
 };
 
 bool Menu::addItem(MenuItem item) {
-
     if (item_count >= MAX_MENU_ITEMS) {
         return false;
     };
@@ -29,15 +28,16 @@ bool Menu::addItem(MenuItem item) {
 }
 
 bool Menu::close() {
-
     this->should_close = true;
     return true;
-
 }
 
 void Menu::renderMenu() {
     render.str("");
-    render<<BOLDSTY BGBRIGHTGREENSTY BLACKSTY << "~{ " << menu_title << " }~" << ENDSTY << "\n";
+    render << BOLDSTY
+            BGBRIGHTGREENSTY BLACKSTY
+            <<
+            "~{ " << menu_title << " }~" << ENDSTY << "\n";
 
     for (int i = item_count - 1; i >= 0; i--) {
         render << (item_count - i) << ". " << BRIGHTGREENSTY << menu_items[i].title << ENDSTY << "\n";
@@ -45,8 +45,7 @@ void Menu::renderMenu() {
 }
 
 
-MenuReturn Menu::open(){
-
+MenuReturn Menu::open() {
     // Items are displayed in the reverse order
     renderMenu();
 
@@ -55,7 +54,7 @@ MenuReturn Menu::open(){
 
     MenuReturn menu_return(STAY);
 
-    should_close=false;
+    should_close = false;
     while (!should_close) {
         int selection = getIntFromUser(1, item_count, ">", true, true);
 
@@ -76,14 +75,12 @@ MenuReturn Menu::open(){
                 std::cout << render.str() << BGREDSTY << "\n!!!" << menu_return.message << "!!!" << ENDSTY << "\n";
                 break;
             case BACK:
-                should_close=true;
+                should_close = true;
                 break;
         }
-
     }
 
     clearConsole();
 
     return MenuReturn(STAY);
-
 }

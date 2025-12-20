@@ -5,12 +5,11 @@
 #include "TUI_functions.h"
 
 #include <cstdint>
-#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
-#include "stylingFunctions.h"
+#include "styling_functions.h"
 #include <string>
 
 #include "../info.h"
@@ -31,7 +30,7 @@ size_t getProperStringLength(const std::string &str) {
     size_t i = 0;
 
     while (i < str.size()) {
-        uint8_t byte = static_cast<uint8_t>(str[i]);
+        auto byte = static_cast<uint8_t>(str[i]);
 
         // Determine how many bytes this character uses
         if ((byte & 0x80) == 0) {
@@ -57,7 +56,7 @@ size_t getProperStringLength(const std::string &str) {
     return length;
 };
 
-void printListItem(std::string item, bool reset) {
+void printListItem(const std::string &item, bool reset) {
     static int index = 1;
 
     if (reset) {
@@ -65,11 +64,11 @@ void printListItem(std::string item, bool reset) {
         return;
     }
 
-    std::cout << "\n" << BRIGHTGREENSTY << index << ")\t" ENDSTY << item ;
+    std::cout << "\n" << BRIGHTGREENSTY << index << ")\t" ENDSTY << item;
     index++;
 };
 
-void printListItem(std::string item) {
+void printListItem(const std::string &item) {
     printListItem(item, false);
 };
 
@@ -78,29 +77,26 @@ void resetListItem() {
 };
 
 
-std::string padString(std::string string_to_pad, unsigned short new_size, char pad_char, bool center) {
-
-    unsigned short padding_amount=new_size - getProperStringLength(string_to_pad);
+std::string padString(const std::string &string_to_pad, unsigned short new_size, char pad_char, bool center) {
+    unsigned short padding_amount = new_size - getProperStringLength(string_to_pad);
 
     std::string left_padding;
     std::string right_padding;
 
     if (center) {
-        left_padding = std::string(padding_amount/2, pad_char);
-        right_padding = std::string(padding_amount/2 + padding_amount%2, pad_char);
-    }else {
+        left_padding = std::string(padding_amount / 2, pad_char);
+        right_padding = std::string(padding_amount / 2 + padding_amount % 2, pad_char);
+    } else {
         left_padding = std::string(padding_amount, pad_char);
     }
 
-    return left_padding+string_to_pad+right_padding;
+    return left_padding + string_to_pad + right_padding;
 };
 
 
-
-
-long long int getIntFromUser(long long int  min, long long int max, const std::string &question, bool has_upper_bound, bool has_lower_bound) {
-
-    long long int  input;
+long long int getIntFromUser(long long int min, long long int max, const std::string &question, bool has_upper_bound,
+                             bool has_lower_bound) {
+    long long int input;
     bool valid_input = false;
 
 
@@ -110,7 +106,6 @@ long long int getIntFromUser(long long int  min, long long int max, const std::s
 
         if (std::cin.fail()) {
             std::cin.clear();
-
         } else {
             if (has_lower_bound && input < min) {
                 valid_input = false;
@@ -130,11 +125,10 @@ long long int getIntFromUser(long long int  min, long long int max, const std::s
 bool getConfirmationFromUser(const std::string &question) {
     char input;
     bool valid_input = false;
-    bool output=false;
+    bool output = false;
 
 
     while (!valid_input) {
-
         std::cout << question;
         std::cout << "[" GREENSTY "y" ENDSTY "/" REDSTY "n" ENDSTY "]";
 
@@ -142,12 +136,11 @@ bool getConfirmationFromUser(const std::string &question) {
 
         if (std::cin.fail()) {
             std::cin.clear();
-
         } else {
-            if (input=='Y'||input=='y') {
+            if (input == 'Y' || input == 'y') {
                 output = true;
                 valid_input = true;
-            } else if (input=='N'||input=='n') {
+            } else if (input == 'N' || input == 'n') {
                 output = false;
                 valid_input = true;
             }
@@ -164,9 +157,7 @@ bool checkForChar(const std::string &string, char c) {
 };
 
 bool validateString(const std::string &string, const std::string &unallowed_chars) {
-
     for (int i = 0; i < unallowed_chars.length(); i++) {
-
         if (checkForChar(string, unallowed_chars[i])) {
             return false;
         }
@@ -176,12 +167,10 @@ bool validateString(const std::string &string, const std::string &unallowed_char
 };
 
 
-std::string getStringFromUser(const std::string &question, bool with_confirmation, std::string unallowed_chars) {
-
+std::string getStringFromUser(const std::string &question, bool with_confirmation, const std::string &unallowed_chars) {
     std::string input;
-    bool confirmed, valid;
-    confirmed=false;
-    valid=false;
+    bool confirmed = false;
+    bool valid = false;
 
     bool needs_validation = !unallowed_chars.empty();
 
@@ -191,31 +180,28 @@ std::string getStringFromUser(const std::string &question, bool with_confirmatio
 
     std::cout << BLACKSTY BGBRIGHTGREENSTY " " << question << " " ENDSTY;
     do {
-
         std::cout << std::endl << ">";
 
         std::getline(std::cin, input);
 
         if (needs_validation) {
-            valid=validateString(input, unallowed_chars);
+            valid = validateString(input, unallowed_chars);
             if (!valid) {
                 std::cout << "You cant have these characters in the input: \"" << unallowed_chars << "\"\n";
             }
-
         }
 
         if (with_confirmation && valid) {
             std::cout << BOLDSTY BLUESTY << "\nYou've entered: " << ENDSTY << input << std::endl;
             confirmed = getConfirmationFromUser("Is that right?");
         }
-
-    } while ((with_confirmation && !confirmed) || !valid );
+    } while ((with_confirmation && !confirmed) || !valid);
 
     return input;
 };
 
 std::string formatTime(std::time_t t, const std::string &format) {
-    std::tm* tm = std::localtime(&t);
+    std::tm *tm = std::localtime(&t);
     std::ostringstream oss;
     oss << std::put_time(tm, format.c_str());
     return oss.str();
@@ -229,8 +215,7 @@ std::time_t getTimeFromUser(const std::string &question) {
     return getTimeFromUser(question, DEFAULT_TIME_FORMAT);
 };
 
-std::time_t getTimeFromUser(const std::string &question, std::string time_format) {
-
+std::time_t getTimeFromUser(const std::string &question, const std::string &time_format) {
     std::string input;
     std::tm timeStruct = {};
     std::time_t result;
@@ -265,7 +250,6 @@ std::time_t getTimeFromUser(const std::string &question, std::string time_format
 
         std::cout << "You've entered: " << formatTime(result, time_format) << std::endl;
         confirmed = getConfirmationFromUser("Is that right?");
-
     } while (!confirmed);
 
     return result;
@@ -274,28 +258,23 @@ std::time_t getTimeFromUser(const std::string &question, std::string time_format
 std::string getStringFromUser(const std::string &question, bool with_confirmation) {
     return getStringFromUser(question, with_confirmation, "");
 }
-std::string getStringFromUserWithPattern(const std::string &question, std::string error_message, std::function<bool(std::string)> checkFunc) {
 
+std::string getStringFromUserWithPattern(const std::string &question, const std::string &error_message,
+                                         const std::function<bool(std::string)> &checkFunc) {
     std::string user_string;
-    bool correct, confirmed=false;
+    bool correct, confirmed = false;
 
     do {
         user_string = getStringFromUser(question, false);
         correct = checkFunc(user_string);
         if (!correct) {
-            std::cout<<error_message<<"\n";
-        }else {
+            std::cout << error_message << "\n";
+        } else {
             std::cout << BOLDSTY BLUESTY << "\nYou've entered: " << ENDSTY << user_string << std::endl;
             confirmed = getConfirmationFromUser("Is that right?");
         }
-
-
-
-
-
-    } while (!(correct&&confirmed));
+    } while (!(correct && confirmed));
 
     return user_string;
-
 };
 

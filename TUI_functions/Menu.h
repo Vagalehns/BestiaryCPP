@@ -18,7 +18,7 @@ struct MenuReturn {
     MenuReturnState state;
     std::string message;
 
-    MenuReturn(MenuReturnState state, std::string message) {
+    MenuReturn(MenuReturnState state, const std::string &message) {
         this->state = state;
         this->message = message;
     }
@@ -28,7 +28,7 @@ struct MenuReturn {
     }
 };
 
-typedef struct  {
+typedef struct {
     std::string title;
     std::function<MenuReturn()> screen_to_call;
 } MenuItem;
@@ -36,12 +36,12 @@ typedef struct  {
 class Menu {
 public:
     MenuItem menu_items[MAX_MENU_ITEMS];
-    char item_count=0;
+    char item_count = 0;
     std::string menu_title;
-    bool should_close=false;
+    bool should_close = false;
     std::ostringstream render;
 
-    explicit Menu(std::string title, std::string exit_name="Back");
+    explicit Menu(std::string title, std::string exit_name = "Back");
 
     bool addItem(MenuItem item);
 
@@ -54,7 +54,7 @@ public:
 
 private:
     int translateFromUserToIndex(int user_sel) const {
-        return item_count-user_sel;
+        return item_count - user_sel;
     }
 };
 

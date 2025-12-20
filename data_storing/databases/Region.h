@@ -5,7 +5,9 @@
 #ifndef BESTIARYCPP_REGION_H
 #define BESTIARYCPP_REGION_H
 
-#include "../genericDatabase.h"
+#include <utility>
+
+#include "../genericDB.h"
 #include "../../TUI_functions/TUI_functions.h"
 
 
@@ -13,222 +15,48 @@ struct Region : DefaultStruct {
     FirstLevelRegion first_level_region;
     std::string name;
 
-    void display() {
-        std::cout << "\n Name: " << name ;
+    void display() const {
+        std::cout << "\n Name: " << name;
         std::cout << "\n First level region: " << FirstLevelRegionStrings[first_level_region] << std::endl;
     };
 
-    Region(){};
+    Region() : first_level_region() {
+    } ;
+
     Region(FirstLevelRegion first_level_region, std::string name) {
         this->first_level_region = first_level_region;
-        this->name = name;
+        this->name = std::move(name);
     }
 };
 
-inline std::vector<Region> getDefaultBroadRegions() {
-    return {
-        // --- ASIA (5) ---
-        {ASIA, "East Asia"},
-        {ASIA, "South Asia"},
-        {ASIA, "Southeast Asia"},
-        {ASIA, "Central Asia & Siberia"},
-        {ASIA, "Middle East & Arabian Peninsula"},
-
-        // --- AFRICA (6) ---
-        {AFRICA, "North Africa (Maghreb & Sahara)"},
-        {AFRICA, "West Africa"},
-        {AFRICA, "East Africa & Horn of Africa"},
-        {AFRICA, "Central Africa & Congo Basin"},
-        {AFRICA, "Southern Africa"},
-        {AFRICA, "Madagascar & Western Indian Ocean Islands"},
-
-        // --- NORTH_AMERICA (4) ---
-        {NORTH_AMERICA, "Canada & Greenland"},
-        {NORTH_AMERICA, "Continental USA & Northern Mexico"},
-        {NORTH_AMERICA, "Central America"},
-        {NORTH_AMERICA, "Caribbean Islands"},
-
-        // --- SOUTH_AMERICA (3) ---
-        {SOUTH_AMERICA, "Amazon Basin & Northern South America"},
-        {SOUTH_AMERICA, "Andes Mountains Region"},
-        {SOUTH_AMERICA, "Southern Cone"},
-
-        // --- ANTARCTICA (2) ---
-        {ANTARCTICA, "Antarctic Peninsula"},
-        {ANTARCTICA, "Antarctic Mainland"},
-
-        // --- EUROPE (4) ---
-        {EUROPE, "Western Europe"},
-        {EUROPE, "Eastern Europe"},
-        {EUROPE, "Northern Europe"},
-        {EUROPE, "Southern Europe"},
-
-        // --- AUSTRALIA_OCEANIA (3) ---
-        {AUSTRALIA_OCEANIA, "Australia"},
-        {AUSTRALIA_OCEANIA, "New Zealand"},
-        {AUSTRALIA_OCEANIA, "Pacific Islands"},
-
-        // --- OCEANIC REGIONS (5) ---
-        {PACIFIC_OCEAN, "North Pacific Ocean"},
-        {PACIFIC_OCEAN, "South Pacific Ocean"},
-        {ATLANTIC_OCEAN, "North Atlantic Ocean"},
-        {ATLANTIC_OCEAN, "South Atlantic Ocean"},
-        {INDIAN_OCEAN, "Indian Ocean"},
-
-        // --- SOUTHERN & ARCTIC OCEANS (2) ---
-        {SOUTHERN_OCEAN, "Southern Ocean"},
-        {ARCTIC_OCEAN, "Arctic Ocean"},
-
-        // --- GENERAL MARINE/GLOBAL (2) ---
-        {OCEANS, "Global Intertidal Zones"},
-        {OCEANS, "Deep Sea"}
-    };
-};
 
 class RegionDB : public DB<Region, MAX_REGIONS> {
-
-
 public:
+    ~RegionDB() = default;
 
-    RegionDB ( bool add_defaults=true) {
+    RegionDB(bool add_defaults = true);
 
-        if (add_defaults) {
-            for (auto region: getDefaultBroadRegions()) {
-                appendAutoID(region);
-            }
-        }
-    }
+    bool inputForm(Region &new_object, bool edit) override;
 
-    bool inputForm(Region &new_object, bool edit) override {
-
-        if (!edit || getConfirmationFromUser("Do you want to edit region name?")) {
-            new_object.name=getStringFromUser("Write region name you want to add", true);
-        }
-
-        if (!edit || getConfirmationFromUser("Do you want to edit first level region?")) {
-            new_object.first_level_region= static_cast<FirstLevelRegion>(getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!"));
-        }
-
-        return true;
-    };
-
-    void filterOptions() override {
-
-        Menu filterMenu("Add filter/search", "View");
-
-        filterMenu.addItem({
-            "Search by name",
-            ([this]() -> MenuReturn {
-
-                std::string search_term = getStringFromUser("Please enter search term:", true);
-                bool full_match = getConfirmationFromUser("Does term must be full match?");
-
-                this->filterByField(&Region::name, makeGenericStringFilter(search_term, full_match));
-
-                return {BACK, ""};
-            })
-        });
-
-        filterMenu.addItem({
-            "Filter by first level region",
-            ([this]() -> MenuReturn {
+    void filterWithOptions() override;
 
 
-                auto first_level_region= static_cast<FirstLevelRegion>(getOptionFromUser(FirstLevelRegionStrings, "Pick first level region!"));
+    void preparedSort(char option) override;
 
-                this->filterByField(&Region::first_level_region, [first_level_region](FirstLevelRegion flr) -> bool {
-                    return first_level_region==flr;
-                });
-
-                return {STAY, ""};
-            })
-        });
+    void sortWithOptions() override;
 
 
-        filterMenu.addItem({
-            "Clear filters",
-            ([this]() -> MenuReturn {
+    std::vector<std::pair<std::string, char> > getViewColums(char view) override;
 
-                this->resetFilter();
+    std::vector<std::string> getAsStrings(Region &ref, char view) override;
 
-                return {BACK, ""};
-            })
-        });
+    std::string convertToCSVLine(int index) override;
 
-        filterMenu.open();
-    }
+    std::string getCSVHeader() override;
 
+    Region getFromCSVline(std::string CSV_line) override;
 
-    void sortOptions() override {
-        Menu sortMenu("Pick sort option", "Don't sort");
-
-        sortMenu.addItem({
-            "Sort by name",
-            ([this]() -> MenuReturn {
-                this->sort(&Region::name, genericStringSort);
-                return {BACK, ""};
-            })
-        });
-
-        sortMenu.addItem({
-            "Sort by first level region",
-            ([this]() -> MenuReturn {
-                this->sort(&Region::first_level_region, [](FirstLevelRegion A, FirstLevelRegion B) {
-                    return genericStringSort(FirstLevelRegionStrings[A], FirstLevelRegionStrings[B]);
-                });
-                return {BACK, ""};
-            })
-        });
-
-        sortMenu.open();
-    };
-
-
-        std::vector< std::pair< std::string, char > > getViewColums(char view)  override {
-                return {{"ID", 'i'}, {"Name", 's'}, {"First Level Region", 's'}};
-            };
-
-
-        std::vector<std::string> getAsStrings(Region &ref, char view) override {
-            std::vector<std::string> result;
-            result.push_back(std::to_string(ref.ID));
-            result.push_back(ref.name);
-            result.push_back(FirstLevelRegionStrings[ref.first_level_region]);
-            return result;
-        }
-
-        std::string convertToCSVLine(int index) override {
-            std::stringstream ss;
-            ss<<data[index].ID<<CSV_SEP<<data[index].name<<CSV_SEP<<data[index].first_level_region;
-            return ss.str();
-        };
-
-        std::string getCSVHeader() override {
-            std::stringstream ss;
-            ss << "ID" << CSV_SEP << "Name" << CSV_SEP << "First level region";
-            return ss.str();
-        };
-
-        Region getFromCSVline(std::string CSV_line) override {
-            std::string name, temp;
-            std::stringstream ss(CSV_line);
-            Region new_region;
-
-            std::getline(ss, temp, CSV_SEP);
-            new_region.ID = std::stoi(temp);
-
-            std::getline(ss, temp, CSV_SEP);
-            new_region.name = temp;
-
-            std::getline(ss, temp, CSV_SEP);
-            new_region.first_level_region = (FirstLevelRegion) std::stoi(temp);
-
-            return new_region;
-        };
-
-    bool isRecordOrphan(Region &ref) override {
-        return false;
-    }
+    bool isRecordOrphan(Region &ref) override;
 };
 
 #endif //BESTIARYCPP_REGION_H

@@ -17,14 +17,13 @@
 "                                                           OOb\"           "
 
 #define APP_USECASE "Simple CLI zoo management app"
-#define APP_VERSION "0.9"
+#define APP_VERSION "1.0"
 #define APP_AUTHOR "Armands Vagalis"
 #define APP_UPDATE_YEAR "2025"
 
 #define HELP_MESSEGE "Bestiary help messege\n"\
                      "It's currently empty\n"\
-                     "But not for long\n"\
-
+                     "But not for long\n"
 #define DEFAULT_TIME_FORMAT "%Y-%m-%d"
 
 #endif //BESTIARYCPP_INFO_H

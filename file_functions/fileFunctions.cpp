@@ -8,20 +8,20 @@
 
 #include "../TUI_functions/TUI_functions.h"
 
-bool checkIfDirectoryExists(fs::path path) {
+bool checkIfDirectoryExists(const fs::path &path) {
     return fs::is_directory(path);
 };
 
-bool checkIfFileExists(fs::path path) {
+bool checkIfFileExists(const fs::path &path) {
     return fs::is_regular_file(path);
 };
 
 
-bool createFolder(fs::path path) {
+bool createFolder(const fs::path &path) {
     return fs::create_directory(path);
 };
 
-bool ensureFolderExists(fs::path path) {
+bool ensureFolderExists(const fs::path &path) {
     if (checkIfDirectoryExists(path)) {
         return true;
     }
@@ -29,21 +29,20 @@ bool ensureFolderExists(fs::path path) {
     return createFolder(path);
 }
 
-bool zipFolder(fs::path source_path, fs::path dest_path) {
-
+bool zipFolder(const fs::path &source_path, const fs::path &dest_path) {
     // tar command syntax: tar -a -c -f <output.zip> <folder/files>
     // -a: auto-detect archive format from extension (.zip)
     // -c: create archive
     // -f: specify archive file name
     // Enclosing paths in double quotes handles spaces
-    std::string command = "tar.exe -a -c -f \"" + dest_path.string() + "\" -C \"" + source_path.parent_path().string() + "\" \"" + source_path.filename().string() + "\"";
+    std::string command = "tar.exe -a -c -f \"" + dest_path.string() + "\" -C \"" + source_path.parent_path().string() +
+                          "\" \"" + source_path.filename().string() + "\"";
     int result = std::system(command.c_str());
 
     return result == 0;
 }
 
-bool unzipFile(fs::path source_path, fs::path dest_path) {
-
+bool unzipFile(const fs::path &source_path, const fs::path &dest_path) {
     // tar command syntax: tar -a -x -f <input.zip> -C <destination_folder>
     // -a: auto-detect archive format from extension (.zip, .tar.gz, etc.)
     // -x: extract archive
@@ -61,18 +60,18 @@ bool unzipFile(fs::path source_path, fs::path dest_path) {
     return result == 0;
 };
 
-void removeFile(fs::path path) {
+void removeFile(const fs::path &path) {
     std::filesystem::remove_all(path);
 }
 
-fs::path getPathFromUser(std::string question, bool ignore_last_part) {
-
-    return getStringFromUserWithPattern(question, "Not a valid path", [ignore_last_part](std::string path)->bool {
-        fs::path p(path);
-        if (ignore_last_part) {
-            return checkIfDirectoryExists(p.parent_path());
-        }else {
-            return checkIfDirectoryExists(p);
-        }
-    });
+fs::path getPathFromUser(const std::string &question, bool ignore_last_part) {
+    return getStringFromUserWithPattern(question, "Not a valid path",
+                                        [ignore_last_part](const std::string &path)-> bool {
+                                            fs::path p(path);
+                                            if (ignore_last_part) {
+                                                return checkIfDirectoryExists(p.parent_path());
+                                            } else {
+                                                return checkIfDirectoryExists(p);
+                                            }
+                                        });
 };

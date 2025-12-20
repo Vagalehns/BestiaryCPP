@@ -13,46 +13,56 @@
 #include <string>
 #include <vector>
 
-#include "stylingFunctions.h"
+#include "styling_functions.h"
 
 void clearConsole();
 
-std::string generateTable(std::vector<std::string> data, int columns, bool borders=false);
+std::string generateTable(std::vector<std::string> data, int columns, bool borders = false);
 
-long long int  getIntFromUser(long long int  min, long long int  max, const std::string &question, bool has_upper_bound, bool has_lower_bound);
+long long int getIntFromUser(long long int min, long long int max, const std::string &question, bool has_upper_bound,
+                             bool has_lower_bound);
+
 bool getConfirmationFromUser(const std::string &question);
 
 bool checkForChar(const std::string &string, char c);
+
 bool validateString(const std::string &string, const std::string &unallowed_chars);
-std::string padString(std::string string_to_pad, unsigned short new_size, char pad_char, bool center);
+
+std::string padString(const std::string &string_to_pad, unsigned short new_size, char pad_char, bool center);
 
 
 size_t getProperStringLength(const std::string &string);
-std::string getStringFromUser(const std::string &question, bool with_confirmation, std::string unallowed_chars);
-std::string getStringFromUser(const std::string &question, bool with_confirmation);
-std::string getStringFromUserWithPattern(const std::string &question, std::string error_message, std::function<bool(std::string)> checkFunc);
 
-std::time_t getTimeFromUser(const std::string &question, std::string format);
+std::string getStringFromUser(const std::string &question, bool with_confirmation, const std::string &unallowed_chars);
+
+std::string getStringFromUser(const std::string &question, bool with_confirmation);
+
+std::string getStringFromUserWithPattern(const std::string &question, const std::string &error_message,
+                                         const std::function<bool(std::string)> &checkFunc);
+
+std::time_t getTimeFromUser(const std::string &question, const std::string &format);
+
 std::time_t getTimeFromUser(const std::string &question);
 
 void resetListItem();
-void printListItem(std::string item, bool reset);
-void printListItem(std::string item);
+
+void printListItem(const std::string &item, bool reset);
+
+void printListItem(const std::string &item);
 
 template<std::size_t N>
-int getOptionFromUser(const std::array<const char*, N>& options, std::string question) {
-
+int getOptionFromUser(const std::array<const char *, N> &options, std::string question) {
     int result;
-    bool valid=false;
+    bool valid = false;
 
-    auto const divider = BRIGHTGREENSTY ">=" + std::string(question.length()-2, '-' ) + "=<" ENDSTY;
+    auto const divider = BRIGHTGREENSTY ">=" + std::string(question.length() - 2, '-') + "=<" ENDSTY;
 
     do {
         clearConsole();
-        std::cout << BLACKSTY BGBRIGHTGREENSTY  " " << question << " " ENDSTY "\n" << divider;
+        std::cout << BLACKSTY BGBRIGHTGREENSTY " " << question << " " ENDSTY "\n" << divider;
 
         resetListItem();
-        for (const auto& opt : options) {
+        for (const auto &opt: options) {
             printListItem(opt);
         }
 
@@ -60,17 +70,14 @@ int getOptionFromUser(const std::array<const char*, N>& options, std::string que
         result = getIntFromUser(1, N, ">", true, true) - 1;
 
         valid = getConfirmationFromUser("You picked \"" + std::string(options[result]) + "\". Is that correct?");
-
     } while (!valid);
 
     return result;
 }
 
 std::string formatTime(std::time_t t, const std::string &format);
+
 std::string formatTime(std::time_t t);
-
-
-
 
 
 #endif //BESTIARYCPP_TUI_FUNCTIONS_H

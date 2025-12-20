@@ -1,13 +1,12 @@
-
-
 #pragma once
 
+
+#include <fstream>
 
 #include "../file_functions/fileFunctions.h"
 
 template<typename DT, unsigned int MaxData>
-bool DB<DT, MaxData>::readFromCSVFile(fs::path filename, fs::path location, bool clear) {
-
+bool DB<DT, MaxData>::readFromCSVFile(const fs::path &filename, const fs::path &location, bool clear) {
     std::ifstream in_file(location / filename);
 
     if (!in_file) {
@@ -20,17 +19,18 @@ bool DB<DT, MaxData>::readFromCSVFile(fs::path filename, fs::path location, bool
     }
 
     std::string line;
-    std::getline(in_file, line); // Read header
+    std::getline(in_file, line);
 
-    if (!(line==getCSVHeader())) {
+    if (line != getCSVHeader()) {
         return false;
     }
 
     while (std::getline(in_file, line)) {
         DT new_data;
         try {
-            new_data=getFromCSVline(line);
-        }catch(...) {
+            new_data = getFromCSVline(line);
+        }
+        catch (...) {
             return false;
         }
         append(new_data);
@@ -39,22 +39,19 @@ bool DB<DT, MaxData>::readFromCSVFile(fs::path filename, fs::path location, bool
     in_file.close();
 
     return true;
-
 }
 
 
-
 template<typename DT, unsigned int MaxData>
-bool DB<DT, MaxData>::saveToCSVFile(fs::path filename, fs::path location) {
-
-    std::ofstream out_file(location / filename );
+bool DB<DT, MaxData>::saveToCSVFile(const fs::path &filename, const fs::path &location) {
+    std::ofstream out_file(location / filename);
 
     if (!out_file) {
         std::cerr << "Error opening file for writing!" << std::endl;
         return false;
     }
 
-    out_file<<getCSVHeader()<<std::endl;
+    out_file << getCSVHeader() << std::endl;
     for (int i = 0; i < counter; i++) {
         out_file << convertToCSVLine(i) << std::endl;
     }
@@ -63,4 +60,3 @@ bool DB<DT, MaxData>::saveToCSVFile(fs::path filename, fs::path location) {
 
     return true;
 }
-

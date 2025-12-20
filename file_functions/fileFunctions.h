@@ -9,17 +9,20 @@
 
 namespace fs = std::filesystem;
 
-bool checkIfDirectoryExists(fs::path path);
-bool checkIfFileExists(fs::path path);
+bool checkIfDirectoryExists(const fs::path &path);
 
-bool createFolder(fs::path path);
-bool ensureFolderExists(fs::path path);
+bool checkIfFileExists(const fs::path &path);
 
-bool zipFolder(fs::path source_path, fs::path dest_path);
-bool unzipFile(fs::path source_path, fs::path dest_path);
+bool createFolder(const fs::path &path);
 
-void removeFile(fs::path path);
+bool ensureFolderExists(const fs::path &path);
 
-fs::path getPathFromUser(std::string question, bool ignore_last_part=false);
+bool zipFolder(const fs::path &source_path, const fs::path &dest_path);
+
+bool unzipFile(const fs::path &source_path, const fs::path &dest_path);
+
+void removeFile(const fs::path &path);
+
+fs::path getPathFromUser(const std::string &question, bool ignore_last_part = false);
 
 #endif //BESTIARYCPP_FILE_FUNCTIONS_H
